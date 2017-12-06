@@ -1,0 +1,253 @@
+<!doctype html>
+<html>
+
+<head>
+	<title> NSW13 </title>
+	<script src="./js/jquery.min.js"></script>
+	<script src="./js/jspsych.js"></script>
+	<script src="./js/plugins/jspsych-survey-multi-choice.js"></script>
+	<script src="./js/plugins/jspsych-similarity.js"></script>
+	<script src="./js/plugins/jspsych-button-response.js"></script>
+	<script src="./js/plugins/jspsych-text.js"></script>
+	<script src="./js/welcome.js"></script>
+	<link href="./js/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+	<link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/black-tie/jquery-ui.min.css" rel="stylesheet" type="text/css"></link>
+</head>
+
+<body>
+	<div id="welcome"></div>       
+</body>
+
+<script>
+//-------------------------------------------------------------------------------- 
+/* randomise conditions and stimuli */
+var groups = ['single pos', 'distant neg'];
+var sampGroups = ['helpful', 'random'];
+let group = "" + jsPsych.randomization.sample(groups, 1, false) + "";
+console.log(group);
+let sampGroup = "" + jsPsych.randomization.sample(sampGroups, 1, false) + "";
+console.log(sampGroup);
+var dimCB = Math.floor(Math.random() * (2 - 1 + 2)) + 1;
+var numPres = 12; // number of presentations of each stim during training
+var numTestStim = 11; // number of test stimuli
+var images = [
+'./img/S1.png', 
+'./img/S2.png',
+'./img/S3.png',
+'./img/S4.png',
+'./img/S5.png',
+'./img/S6.png',
+'./img/S7.png',
+'./img/S8.png',
+'./img/S9.png',
+'./img/S10.png',
+'./img/S11.png',
+'./img/csplus.png', 
+'./img/csminus.png'
+];
+jsPsych.pluginAPI.preloadImages(images);
+
+//--------------------------------------------------------------------------------  
+/* initialise timeline*/
+var timeline = [];
+var introloop = [];
+var turkcode = (Math.floor(Math.random() * 899999) + 100000).toString(); 
+var trainBlock = [];
+var testBlock = [];
+
+//--------------------------------------------------------------------------------  
+/* function to start the jsPsych experiment */
+function startExperiment() {
+
+  // add properties to each trial in the jsPsych data
+  jsPsych.data.addProperties({
+  	turkcode: turkcode,
+  	group: group,
+  	sampGroup: sampGroup
+  });
+
+  jsPsych.init({
+  	timeline: timeline,
+  	preload_images: images,
+  	on_finish: function() { 
+  		endExperiment( jsPsych.data.dataAsCSV(), function() { document.write('<div id="endscreen" class="endscreen" style="width:1000px"><div class="endscreen" style="text-align:center; border:0px solid; padding:10px; font-size:120%; width:800px; float:right"><p><br><br><br>All done!<br><br>Your completion code is <span id="turkcode" style="font-weight:bold;font-size:130%">' + turkcode + '</span>. To receive payment for the HIT, return to the Amazon Mechanical Turk page and enter this code. Please contact us if something goes wrong and we\'ll fix it as quickly as possible.</p></div></div>') })
+  	}
+  });
+}
+
+/* save and finish */ 
+function endExperiment(dataset,callback) {
+  jsPsych.data.displayData() // useful for debugging, comment when running for reals
+  // $.post('submit',{"content": dataset}); // uncomment when running for reals
+  setTimeout(callback,1000) 
+
+}
+
+/* change the display property of a set of objects */
+function setDisplay(theClass, theValue) {
+	var i, classElements = document.getElementsByClassName(theClass);
+	for (i = 0; i < classElements.length; i = i + 1) {
+		classElements[i].style.display = theValue;
+	}
+}
+
+//-------------------------------------------------------------------------------- 
+/* training instruction block */
+var trainInstruction_block = {
+	type: 'button-response',
+	timing_post_trial: 1,
+	button_html: '<button class="jspsych-btn" style="display:none">%choice%</button>',
+	choices: ['Click here to continue'],
+	on_trial_start: function() { setTimeout(function() {setDisplay("jspsych-btn","")}, 500)},
+	is_html: true,
+	timeline: [
+	{stimulus: 'This is the first instuction page'},
+	{stimulus: 'This is the second instuction page'}
+	]
+};
+
+introloop.push(trainInstruction_block); // <- the setup block gets pushed to a "loop node"
+
+/* text defining the instruction check questions */ 
+var Q0_text = "<b>Question 1:</b> What is the answer to this question?";
+var Q0_answers = ["Something wrong", "Something else wrong", "Something CORRECT"];
+var Q1_text = "<b>Question 2:</b> What is the answer to this question?";
+var Q1_answers = ["Something wrong", "Something CORRECT", "Something else wrong"];
+var correctstring = '{"Q0":"' + Q0_answers[2] + '","Q1":"' + Q1_answers[1] + '"}';
+
+/* define instruction check block */
+var instructioncorrect = false; 
+var instruction_check = {
+	type: "survey-multi-choice",
+	preamble: ["<p align='center'><b>Check your knowledge before you begin!</b></p>"],
+	questions: [Q0_text, Q1_text],
+	options: [Q0_answers, Q1_answers],
+	on_finish: function(data) {
+		if( data.responses == correctstring) {
+			action = false;
+			instructioncorrect = true;
+		}
+	}
+}
+introloop.push(instruction_check)
+
+//--------------------------------------------------------------------------------  
+/* define a page for the incorrect response */
+var showsplash = true;
+var splash_screen = {
+	type: 'button-response',
+	timing_post_trial: 0,
+	button_html: '<button class="jspsych-btn" style="display:none">%choice%</button>',
+	choices: ['Click here to read the instructions again'],
+	on_trial_start: function() { setTimeout(function() {setDisplay("jspsych-btn","")}, 500)},
+	is_html: true,
+	stimulus: 'Unfortunately, at least one of your answers was incorrect.'
+}
+
+/* ...but push it to a conditional node that only shows it if the response was wrong */
+var conditional_splash = {
+	timeline: [splash_screen],
+	conditional_function: function(data) {
+              return !instructioncorrect // skip if correct
+          }
+      }
+      introloop.push(conditional_splash)
+
+      /* finally, add the entirety of this introductory section to a loop node ... */
+      var loop_node = {
+      	timeline: introloop,
+      	loop_function: function(data) {
+              //var action = true;
+              return !instructioncorrect // stop looping if correct
+          }
+      }
+      timeline.push(loop_node) // ... and add that to the timeline
+      
+      /* success trial */
+      var successtrial = {
+      	type: 'button-response',
+      	timing_post_trial: 0,
+      	button_html: '<button class="jspsych-btn" style="display:none">%choice%</button>',
+      	choices: ['Click here to begin the experiment'],
+      	on_trial_start: function() { setTimeout(function() {setDisplay("jspsych-btn","")}, 500)},
+      	is_html: true,
+      	stimulus: 'Well done!'
+      };
+      timeline.push(successtrial);
+
+//-------------------------------------------------------------------------------- 
+/* define training block */
+var trainBlock = {
+	type: 'similarity',
+	labels: ['Certain NO SHOCK', 'Certain SHOCK'],
+	show_ticks: false,
+	show_response: 'FIRST_STIMULUS',
+	timing_first_stim: -1,
+	timing_second_stim: 0,
+	timing_image_gap: 0,
+	prompt: 'The above picture appears on the machine. What is the likelihood of this stimulus causing a SHOCK?',
+	randomize_order: true,
+	timeline: [
+	{stimuli: ['./img/csplus.png']},
+	{stimuli: ['./img/csplus.png']},
+	{stimuli: ['./img/csplus.png']},
+	{stimuli: ['./img/csplus.png']},
+	{stimuli: ['./img/csminus.png']},
+	{stimuli: ['./img/csminus.png']},
+	{stimuli: ['./img/csminus.png']},
+	{stimuli: ['./img/csminus.png']}
+	]
+};
+timeline.push(trainBlock); 
+
+//--------------------------------------------------------------------------------
+/* test instruction block */
+var testInstruction_block = {
+	type: 'button-response',
+	timing_post_trial: 1,
+	button_html: '<button class="jspsych-btn" style="display:none">%choice%</button>',
+	choices: ['Click here to continue'],
+	on_trial_start: function() { setTimeout(function() {setDisplay("jspsych-btn","")}, 500)},
+	is_html: true,
+	timeline: [
+	{stimulus: 'For the next few trials, you will be shown some more pictures, but you will NOT be shown'},
+	{stimulus: 'This is the second instuction page'}
+	]
+};
+timeline.push(testInstruction_block); 
+
+//-------------------------------------------------------------------------------- 
+/* define test block */ 
+var testBlock = {
+	type: 'similarity',
+	labels: ['Certain NO SHOCK', 'Certain SHOCK'],
+	show_ticks: false,
+	show_response: 'FIRST_STIMULUS',
+	timing_first_stim: -1,
+	timing_second_stim: 0,
+	timing_image_gap: 0,
+	prompt: 'The above picture appears on the machine. What is the likelihood of this stimulus causing a SHOCK?',
+	randomize_order: true,
+	timeline: [
+	{stimuli: ['./img/S1.png']},
+	{stimuli: ['./img/S2.png']},
+	{stimuli: ['./img/S3.png']},
+	{stimuli: ['./img/S4.png']},
+	{stimuli: ['./img/S5.png']},
+	{stimuli: ['./img/S6.png']},
+	{stimuli: ['./img/S7.png']},
+	{stimuli: ['./img/S8.png']},
+	{stimuli: ['./img/S9.png']},
+	{stimuli: ['./img/S10.png']},
+	{stimuli: ['./img/S11.png']}
+	]
+};
+timeline.push(testBlock); 
+
+//--------------------------------------------------------------------------------  
+/* start by running the "welcome.js" script */
+welcome.run();
+
+</script>
+</html>

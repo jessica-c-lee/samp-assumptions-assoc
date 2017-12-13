@@ -145,6 +145,10 @@ jsPsych.plugins.categorize = (function() {
           atext = trial.incorrect_text.replace("%ANS%", trial.text_answer);
         }
 
+        // show correct outcome in feedback (J.L.)
+        // var corrOutcome = timeline.outcomeText[0]; 
+        // atext = atext + corrOutcome;
+
         // show the feedback
         display_element.append(atext);
       }

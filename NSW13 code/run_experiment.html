@@ -157,7 +157,7 @@ var trainInstruction_block = {
 	timing_post_trial: 1,
 	button_html: '<button class="jspsych-btn" style="display:none">%choice%</button>',
 	choices: ['Click here to continue'],
-	on_trial_start: function() { setTimeout(function() {setDisplay("jspsych-btn","")}, 5000)},
+	on_trial_start: function() { setTimeout(function() {setDisplay("jspsych-btn","")}, 2000)},
 	is_html: true,
 	timeline: [trainIns1, trainIns2, sampIns]
 };
@@ -320,7 +320,7 @@ var testInstruction_block = {
 	is_html: true,
 	timeline: [
 	{stimulus: 'For the next few trials, you will be shown some more pictures, but you will NOT be shown feedback about whether a shock occurred. '},
-	{stimulus: 'Continue to make predictions about whether you think a shock will occur in the same way as before. '}
+	{stimulus: 'You will still be making predictions about whether you think a shock will occur or not. However this time, you will be making a rating on a scale ranging from "Definitely NO SHOCK" to "Definitely SHOCK". Use your mouse to drag the slider along the scale to make your rating. '}
 	]
 };
 timeline.push(testInstruction_block); 
@@ -459,31 +459,65 @@ var quesInstruction_block = {
 	'<p>You will still receive your payment no matter what.</p>' +
 	'<p>There were TWO parts to this experiment. In the first part you ' +
 	'received feedback for your predictions, and in the second part you did ' +
-	'NOT receive feedback</p>' +
-	'<p>We will be asking you the same set of questions for the FIRST ' +
-	'<b>and</b> the SECOND part of the experiment.</p>'
+	'NOT receive feedback</p>'
 }]};
 timeline.push(quesInstruction_block); 
 
 //--------------------------------------------------------------------------------
 /* define questionnaire */ 
 
-// var likertLabels = ['Definitely untrue', '', '', '', 'Definitely true'];
+// feature importance
+var likertLabels = ['Definitely untrue', 'Probably untrue', 'Neutral', 'Probably true', 'Definitely true'];
 
-// var questionnaire = {
-// 	type: 'survey-likert',
-// 	labels: [likertLabels, likertLabels]
-// 	timeline: [
-// 	{questions: 'In the FIRST part of the experiment, the SHAPE of the symbol ' +
-// 	'determined whether a shock occurred: '},
-// 	{questions: 'In the FIRST part of the experiment, the COLOR of the symbol ' +
-// 	'determined whether a shock occurred: '},
-// 	{questions: 'In the SECOND part of the experiment, the SHAPE of the symbol ' +
-// 	'determined whether a shock occurred: '},
-// 	{questions: 'In the SECOND part of the experiment, the COLOR of the symbol ' +
-// 	'determined whether a shock occurred: '},
-// 	]
-// };
+var questionnaire = {
+	type: 'survey-likert',
+	labels: [likertLabels, likertLabels, likertLabels, likertLabels],
+	questions: [
+	'In the <b>FIRST</b> part of the experiment, the <b>SHAPE</b> of the symbol ' +
+	'determined whether a shock occurred: ', 
+	'In the <b>FIRST</b> part of the experiment, the <b>COLOR</b> of the symbol ' +
+	'determined whether a shock occurred: ',
+    'In the <b>SECOND</b> part of the experiment, the <b>SHAPE</b> of the symbol ' +
+	'determined whether a shock occurred: ',
+    'In the <b>SECOND</b> part of the experiment, the <b>COLOR</b> of the symbol ' +
+	'determined whether a shock occurred: ',
+	]
+};
+timeline.push(questionnaire); 
+
+// forced-choice questions
+var questionnaireFC = {
+	type: 'survey-multi-choice',
+	questions: [
+	'<font size="+2">If you had to choose, which of the following do you believe is <b>most</b> correct? </font>'
+	],
+	options: [
+	['Only a specific colored symbol (and those similar to it) led to shock',
+	'Colored symbols led to shock',
+	'The greener the symbol, the greater the likelihood of shock',
+	'The bluer the symbol, the greater the likelihood of shock']],
+	required: true,
+	horizontal: true,
+	preamble: '<font size="-1">Please read through each option <b>carefully</b></font>'
+};
+timeline.push(questionnaireFC); 
+//-------------------------------------------------------------------------------- 
+/* manipulation check */
+
+var manCheck = {
+	type: 'survey-multi-choice',
+	questions: [
+	'<font size="+2">Did you believe that the symbols you saw in the <b>first</b> part of the experiment were: </font>'
+	],
+	options: [
+	['Randomly selected',
+	'Selected on purpose in order to be helpful'
+	]],
+	required: true,
+	horizontal: false,
+	preamble: '<font size="-1">Please be as <b>honest</b> as possible </font>'
+};
+timeline.push(manCheck); 
 
 //--------------------------------------------------------------------------------  
 /* start by running the "welcome.js" script */

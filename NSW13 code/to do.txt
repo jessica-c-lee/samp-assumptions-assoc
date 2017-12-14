@@ -2,9 +2,11 @@ NSW13 To Do
 ====================================================================
 - Training instructions
 - Sampling instructions
-- Sampling manipulation - jspsych-multi-stim-multi-response plugin??
+- Sampling manipulation - cards.js library?
 - Questionnaire
-
+- Cover story (pics, wording)
+- Choose stimuli
+- Change timing for instructions screens
 
 Leave until the end:
 - Change welcome.js

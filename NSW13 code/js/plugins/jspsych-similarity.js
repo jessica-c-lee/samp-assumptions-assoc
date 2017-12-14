@@ -58,7 +58,7 @@ jsPsych.plugins.similarity = (function() {
     }
 
     setTimeoutHandlers.push(setTimeout(function() {
-      // showBlankScreen(); // Modified by JL (only want to show one stimulus)
+      // showBlankScreen(); // Modified to only show one stimulus (JL)
     }, trial.timing_first_stim));
 
 

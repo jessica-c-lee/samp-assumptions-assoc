@@ -1,15 +1,15 @@
 NSW13 To Do
 ====================================================================
-- Training instructions
 - Sampling instructions
-- Sampling manipulation - cards.js library?
-- Questionnaire
 - Cover story (pics, wording)
 - Choose stimuli
 - Change timing for instructions screens
+- Centre everything like welcome.js
+- Make stimulus appear first, and then questions/ratings etc.
+- Make scale in ratings test less wide (words going off the page)
 
 Leave until the end:
-- Change welcome.js
+- Change text of welcome.js
 - Correct PIS linked
 
 

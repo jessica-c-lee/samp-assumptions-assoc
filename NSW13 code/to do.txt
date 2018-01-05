@@ -7,6 +7,7 @@ NSW13 To Do
 - Centre everything like welcome.js
 - Make stimulus appear first, and then questions/ratings etc.
 - Make scale in ratings test less wide (words going off the page)
+- Show card at beginning of trial, before showing stimulus
 
 Leave until the end:
 - Change text of welcome.js

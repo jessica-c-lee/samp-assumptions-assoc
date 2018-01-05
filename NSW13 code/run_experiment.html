@@ -7,6 +7,7 @@
 	<script src="./js/jspsych.js"></script>
 	<script src="./js/plugins/jspsych-instructions.js"></script>
 	<script src="./js/plugins/jspsych-html-button-response.js"></script>
+	<script src="./js/plugins/jspsych-free-sort.js"></script>
 	<script src="./js/plugins/jspsych-categorize-image.js"></script>
 	<script src="./js/plugins/jspsych-image-slider-response.js"></script>
 	<script src="./js/plugins/jspsych-survey-multi-choice.js"></script>
@@ -34,6 +35,8 @@ console.log('group is: ' + group + ', sampling group is: ' + sampGroup + ', dimC
 var numPres = 4; // number of presentations of each stim during training
 var numTestStim = 11; // number of test stimuli
 var images = [
+'./img/plain_card.jpg', 
+'./img/marked_card.jpg',
 './img/S1.png', 
 './img/S2.png',
 './img/S3.png',
@@ -163,7 +166,36 @@ introloop.push(trainInstruction_block); // <- the setup block gets pushed to a "
 //--------------------------------------------------------------------------------
 /* sampling manipulation */
 
+if (sampGroup === 'helpful') {
+	sampManIns = ['<p>Please drag the <b>' + numCards + '</b> that we have selected for you (marked with an X) to the <b>top</b> of the screen. </p>' +
+		'<p>Drag all other cards to the bottom of the screen, you will not see these symbols. </p>'];
+} else if (sampGroup === 'random') {
+	sampManIns = ['<p>Please randomly choose <b>' + numCards + '</b> and drag to the <b>top</b> of the screen. </p>' +
+	'<p>Drag all other cards to the bottom of the screen, you will not see these symbols.</p>'];
+}
 
+var numSampCards = 20;
+
+var cardList = Array.apply(null, Array(numSampCards)).map(String.prototype.valueOf,'./img/plain_card.jpg')
+
+if (sampGroup === 'helpful') {
+	if (group === 'single pos') {
+		cardList = Array.apply(null, Array(numSampCards-1)).map(String.prototype.valueOf,'./img/plain_card.jpg');
+		cardList = cardList.concat('./img/marked_card.jpg');
+	} else if (group === 'distant neg') {
+		cardList = Array.apply(null, Array(numSampCards-2)).map(String.prototype.valueOf,'./img/plain_card.jpg');
+		cardList = cardList.concat(['./img/marked_card.jpg', './img/marked_card.jpg']);
+	}
+}
+
+var sampMan = {
+	type: 'free-sort',
+	stimuli: cardList,
+	stim_height: 180,
+	stim_width: 120,
+	prompt: sampManIns,
+}
+introloop.push(sampMan);
 
 //--------------------------------------------------------------------------------
 /* instruction check questions */ 

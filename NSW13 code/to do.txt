@@ -2,16 +2,14 @@ NSW13 To Do
 ====================================================================
 - Sampling instructions
 - Cover story (pics, wording)
-- Choose stimuli
 - Change timing for instructions screens
-- Centre everything like welcome.js
-- Make stimulus appear first, and then questions/ratings etc.
-- Make scale in ratings test less wide (words going off the page)
-- Show card at beginning of trial, before showing stimulus
+- Centre everything like welcome.js, relative to window width??
+- Make stimulus appear first, and then questions/ratings etc. (training and test)
 
 Leave until the end:
 - Change text of welcome.js
 - Correct PIS linked
+- Working on Mac/PC
 
 
 
@@ -19,3 +17,4 @@ Leave until the end:
 CHECK DURING PILOTING
 ====================================================================
 - Recording data okay
+- Recording movement away from experiment (using jspsych)

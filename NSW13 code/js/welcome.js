@@ -3,15 +3,15 @@ var welcome = {};
 // --------------  things that vary from task to task --------------
 
 welcome.task = {};
-welcome.task.blurb = '<b>"Study name"</b> is a short psychological study investigating how people make decisions.';
-welcome.task.time = '5 minutes';
-welcome.task.pay = 'US$0.85';
+welcome.task.blurb = '<b>"Learning from limited evidence"</b> is a short psychological study investigating how people make decisions.';
+welcome.task.time = '20 minutes';
+welcome.task.pay = 'US$3.33';
 
 // --------------  things that vary between ethics approvals --------------
 
 welcome.ethics = {};
-welcome.ethics.approval = '2574';
-welcome.ethics.name = 'Theories of inductive reasoning';
+welcome.ethics.approval = '2615';
+welcome.ethics.name = 'Generalization in Humans';
 welcome.ethics.selection = 'You are invited to participate in a study of how human reasoning works.  We hope to learn what information people find most useful in guiding their judgments about the world. You were selected as a possible participant in this study because you accepted our HIT on Amazon Mechanical Turk.';
 welcome.ethics.description = 'If you decide to participate, we will present you with some reasoning problems in which you need to use the (possibly incomplete) information to make judgements (or guesses) about the truth of different propositions. Detailed instructions will be provided once the task begins. The exact number of problems you need to solve depends on which version of the task the computer assigns you to, but the on-screen display will inform you of how much further you have to go. The task should take approximately ' + welcome.task.time + ' to complete including reading time.';
 

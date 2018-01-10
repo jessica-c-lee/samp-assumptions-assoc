@@ -37,17 +37,18 @@ var numTestStim = 11; // number of test stimuli
 var images = [
 './img/plain_card.jpg', 
 './img/marked_card.jpg',
-'./img/S1.png', 
-'./img/S2.png',
-'./img/S3.png',
-'./img/S4.png',
-'./img/S5.png',
-'./img/S6.png',
-'./img/S7.png',
-'./img/S8.png',
-'./img/S9.png',
-'./img/S10.png',
-'./img/S11.png'
+'./img/S1.jpg', 
+'./img/S2.jpg',
+'./img/S3.jpg',
+'./img/S4.jpg',
+'./img/S5.jpg',
+'./img/S6.jpg',
+'./img/S7.jpg',
+'./img/S8.jpg',
+'./img/S9.jpg',
+'./img/S10.jpg',
+'./img/S11.jpg',
+'./img/checker.jpg'
 ];
 jsPsych.pluginAPI.preloadImages(images);
 
@@ -56,6 +57,16 @@ if (group === 'single pos') {
 } else if (group === 'distant neg') {
 	var numCards = '2 cards';
 }
+
+// if (sampGroup === 'helpful') {
+// 	var sampManPrompt = '<p>Now you will see the stimuli we have selected for you. </p>' +
+// 		'<p>In the next phase, you will learn whether these stimuli cause a SHOCK, or not. </p>';
+// 	var chosenCards = ['./img/marked_card.jpg','./img/marked_card.jpg'];
+// } else if (sampGroup === 'random') {
+// 	var sampManPrompt = '<p>Now you will see the stimuli you selected at random. </p>' +
+// 		'<p>In the next phase, you will learn whether these stimuli cause a SHOCK, or not. </p>';
+// 	var chosenCards = ['./img/plain_card.jpg','./img/plain_card.jpg'];
+// }
 
 //--------------------------------------------------------------------------------  
 /* initialise timeline*/
@@ -103,11 +114,11 @@ function setDisplay(theClass, theValue) {
 	}
 }
 //-------------------------------------------------------------------------------- 
-/* introloop: 
-- includes instructions, sampling manipulation, instruction check, and splash screen
-- loops continuously until participant gets questions correct */
+/* instructions text */
 
-var trainIns1 = [
+var ins = {};
+
+ins.train1 = [
 	'<div style="text-align:left; border:0px solid; padding:10px;' +
 	'                          width:800px; float:none; font-size:100%">' +
 	'<p>In this experiment we are interested in how you learn from limited evidence. ' +
@@ -123,7 +134,7 @@ var trainIns1 = [
 	'will occur. </p>'
 ];
 
-var trainIns2 = [
+ins.train2 = [
 	'<div style="text-align:left; border:0px solid; padding:10px;' +
 	'                          width:800px; float:none; font-size:100%">' +
 	'<p>As we mentioned before, we are interested in how you make predictions ' +
@@ -134,7 +145,7 @@ var trainIns2 = [
 ];
 
 if (sampGroup === 'helpful') {
-	var sampIns = [
+	ins.samp1 = [
 		'<div style="text-align:left; border:0px solid; padding:10px;' +
 	'                          width:800px; float:none; font-size:100%">' +
 		'<p>To make your job easier, we have specifically chosen certain symbols to ' +
@@ -143,7 +154,7 @@ if (sampGroup === 'helpful') {
 		'that can be displayed on the machine. </p>'
 	];
 } else if (sampGroup === 'random') {
-	var sampIns = [
+	ins.samp1 = [
 		'<div style="text-align:left; border:0px solid; padding:10px;' +
 	'                          width:800px; float:none; font-size:100%">' +
 		'<p>These symbols will be randomly chosen. </p>' +
@@ -154,10 +165,85 @@ if (sampGroup === 'helpful') {
 	]
 }
 
+ins.test = ['<div style="text-align:left; border:0px solid; padding:10px;' +
+	'                          width:800px; float:none; font-size:100%">' +
+	'<p>For the next few trials, you will be shown some more pictures, ' +
+	'but you will NOT be shown feedback about whether a shock occurred.</p>' +
+	'<p>You will still be making predictions about whether you think a shock will occur or not. ' +
+	'However this time, you will be making a rating on a scale ranging from ' +
+	'"Definitely NO SHOCK" to "Definitely SHOCK". </p>' +
+	'<p>Use your mouse to drag the slider along the scale to make your rating. </p>'
+];
+
+ins.ques1 = ['<div style="text-align:left; border:0px solid; padding:10px;' +
+	'                          width:800px; float:none; font-size:100%">' +
+	'<p>We will now ask you some questions about what you have learned in ' +
+	'the experiment.</p>' +
+	'<p>Please read each option <b>carefully</b> and answer as honestly as you can.</p>' +
+	'<p>You will still receive your payment no matter what.</p>'
+];
+
+ins.ques2 = ['<div style="text-align:left; border:0px solid; padding:10px;' +
+	'                          width:800px; float:none; font-size:100%">' +
+	'<p>There were <b>two</b> parts to this experiment. In the <b>first</b> part you ' +
+	'received feedback for your predictions, and in the <b>second</b> part you did ' +
+	'<b>NOT</b> receive feedback. </p>'
+];
+//--------------------------------------------------------------------------------
+/* prompt text */
+
+var prompt = {};
+
+prompt.train = '<center><p>The above picture appears on the machine. What do you ' +
+	'think will happen? </p>' +
+	'<p>Press <b>S</b> for <b>S</b>HOCK </p> <p>or </p> <p><b>N</b> for <b>N</b>O SHOCK. </p></center>';
+
+prompt.test = '<center><p>The above picture appears on the machine. </p>' +
+			'<p>What is the likelihood of this stimulus causing a SHOCK?</p></center>';
+
+//--------------------------------------------------------------------------------
+/* questionnaire text */
+
+var ques = {};
+
+ques.likertLabels = ['Definitely untrue', 'Probably untrue', 'Neutral', 'Probably true', 'Definitely true'];
+
+ques.feat1 = 'In the <b>FIRST</b> part of the experiment, the <b>SHAPE</b> of the symbol ' +
+	'determined whether a shock occurred: ';
+
+ques.feat2 = 'In the <b>FIRST</b> part of the experiment, the <b>COLOR</b> of the symbol ' +
+	'determined whether a shock occurred: ';
+
+ques.feat3 = 'In the <b>SECOND</b> part of the experiment, the <b>SHAPE</b> of the symbol ' +
+	'determined whether a shock occurred: ';
+
+ques.feat4 = 'In the <b>SECOND</b> part of the experiment, the <b>COLOR</b> of the symbol ' +
+	'determined whether a shock occurred: '; 
+
+ques.rulePrompt = '<font size="+2">If you had to choose, which of the following do you believe is <b>most</b> correct? </font>';
+
+ques.ruleOptions = ['Only a specific colored symbol (and those similar to it) led to shock',
+		'Colored symbols led to shock',
+		'The greener the symbol, the greater the likelihood of shock',
+		'The bluer the symbol, the greater the likelihood of shock'];
+
+ques.rulePreamble = '<font size="-1">Please read through each option <b>carefully</b></font>';
+
+ques.manCheckPrompt = '<font size="+2">Did you believe that the symbols you saw in the <b>first</b> part of the experiment were: </font>';
+
+ques.manCheckOptions = ['Randomly selected', 'Selected on purpose in order to be helpful'];
+
+ques.manCheckPreamble = '<font size="-1">Please be as <b>honest</b> as possible. You will still receive your payment. </font>';
+
+//--------------------------------------------------------------------------------
+/* introloop: 
+- includes instructions, sampling manipulation, instruction check, and splash screen
+- loops continuously until participant gets questions correct */
+
 /* training instruction block */
 var trainInstruction_block = {
 	type: 'instructions',
-	pages: [trainIns1, trainIns2, sampIns],
+	pages: [ins.train1, ins.train2, ins.samp1],
 	allow_keys: false,
 	show_clickable_nav: true
 };
@@ -166,36 +252,47 @@ introloop.push(trainInstruction_block); // <- the setup block gets pushed to a "
 //--------------------------------------------------------------------------------
 /* sampling manipulation */
 
-if (sampGroup === 'helpful') {
-	sampManIns = ['<p>Please drag the <b>' + numCards + '</b> that we have selected for you (marked with an X) to the <b>top</b> of the screen. </p>' +
-		'<p>Drag all other cards to the bottom of the screen, you will not see these symbols. </p>'];
-} else if (sampGroup === 'random') {
-	sampManIns = ['<p>Please randomly choose <b>' + numCards + '</b> and drag to the <b>top</b> of the screen. </p>' +
-	'<p>Drag all other cards to the bottom of the screen, you will not see these symbols.</p>'];
-}
+// using free-sort
+// if (sampGroup === 'helpful') {
+// 	sampManIns = ['<p>Please drag the <b>' + numCards + '</b> that we have selected for you (marked with an X) to the <b>top</b> of the screen. </p>' +
+// 		'<p>Drag all other cards to the bottom of the screen, you will not see these symbols. </p>'];
+// } else if (sampGroup === 'random') {
+// 	sampManIns = ['<p>Please randomly choose <b>' + numCards + '</b> and drag to the <b>top</b> of the screen. </p>' +
+// 	'<p>Drag all other cards to the bottom of the screen, you will not see these symbols.</p>'];
+// }
 
-var numSampCards = 20;
+// var numSampCards = 20;
 
-var cardList = Array.apply(null, Array(numSampCards)).map(String.prototype.valueOf,'./img/plain_card.jpg')
+// var cardList = Array.apply(null, Array(numSampCards)).map(String.prototype.valueOf,'./img/plain_card.jpg')
 
-if (sampGroup === 'helpful') {
-	if (group === 'single pos') {
-		cardList = Array.apply(null, Array(numSampCards-1)).map(String.prototype.valueOf,'./img/plain_card.jpg');
-		cardList = cardList.concat('./img/marked_card.jpg');
-	} else if (group === 'distant neg') {
-		cardList = Array.apply(null, Array(numSampCards-2)).map(String.prototype.valueOf,'./img/plain_card.jpg');
-		cardList = cardList.concat(['./img/marked_card.jpg', './img/marked_card.jpg']);
-	}
-}
+// if (sampGroup === 'helpful') {
+// 	if (group === 'single pos') {
+// 		cardList = Array.apply(null, Array(numSampCards-1)).map(String.prototype.valueOf,'./img/plain_card.jpg');
+// 		cardList = cardList.concat('./img/marked_card.jpg');
+// 	} else if (group === 'distant neg') {
+// 		cardList = Array.apply(null, Array(numSampCards-2)).map(String.prototype.valueOf,'./img/plain_card.jpg');
+// 		cardList = cardList.concat(['./img/marked_card.jpg', './img/marked_card.jpg']);
+// 	}
+// }
 
-var sampMan = {
-	type: 'free-sort',
-	stimuli: cardList,
-	stim_height: 180,
-	stim_width: 120,
-	prompt: sampManIns,
-}
-introloop.push(sampMan);
+// // "choose" cards
+// var sampMan = {
+// 	type: 'free-sort',
+// 	stimuli: cardList,
+// 	stim_height: 180,
+// 	stim_width: 120,
+// 	prompt: sampManIns,
+// }
+// introloop.push(sampMan);
+
+// // show stimuli chosen
+// var showChosenStim = {
+// 	type: 'html-button-response',
+// 	choices: ['Click here to see the stimuli'],
+// 	prompt: sampManPrompt,
+// 	stimuli: chosenCards,
+// }
+// introloop.push(showChosenStim);
 
 //--------------------------------------------------------------------------------
 /* instruction check questions */ 
@@ -262,10 +359,13 @@ timeline.push(successtrial);
 //-------------------------------------------------------------------------------- 
 /* define training stimuli */
 
+var shockKeyCode = 83; // keycode for s
+var noShockKeyCode = 78; // keycode for n
+
 var csplus = {
-	stimulus: './img/S6.png',
+	stimulus: './img/S6.jpg',
 	text_answer: 'SHOCK!',
-	key_answer: 65, // keycode for a
+	key_answer: shockKeyCode,
 	data: {
 		dimVal: 6,
 		trialType: 'CS+',
@@ -275,9 +375,9 @@ var csplus = {
 };
 
 var csminus = {
-	stimulus: './img/S4.png',
+	stimulus: './img/checker.jpg',
 	text_answer: 'no shock occurred',
-	key_answer: 76, // keycode for l
+	key_answer: noShockKeyCode, 
 	data: {
 		dimVal: 4,
 		trialType: 'CS-',
@@ -288,9 +388,9 @@ var csminus = {
 
 if (dimCB === 2) {	// flip dimension
 	var csminus = {
-		stimulus: './img/S8.png',
+		stimulus: './img/S8.jpg',
 		text_answer: 'no shock occurred',
-		key_answer: 76, // keycode for l
+		key_answer: noShockKeyCode, 
 		data: {
 			dimVal: 4,
 			trialType: 'CS-',
@@ -314,36 +414,24 @@ var trainSeq = jsPsych.randomization.repeat(trainStim, numPres, unpack=false);
 
 var trainBlock = {
 	type: 'categorize-image',
-	choices: [65, 76],
+	choices: [shockKeyCode, noShockKeyCode],
 	correct_text: '<p><center><font size="+2">Correct! </font></center></p>' +
 	'<p><center><font size="+10">%ANS%</font></center></p>',
 	incorrect_text: '<p><center><font size="+2">Incorrect </font></center></p>' +
 	'<p><center><font size="+10">%ANS%</font></center></p>',
-	prompt: '<center><p>The above picture appears on the machine. Do you think that a ' +
-	' shock will occur? </p>' +
-	'<p>Press A for SHOCK or L for NO SHOCK. </p></center>',
+	prompt: prompt.train,
 	timing_feedback_duration: 5000,
 	post_trial_gap: 2000,
 	timeline: trainSeq
 };
-timeline.push(trainBlock); 
+//timeline.push(trainBlock); 
 
 //--------------------------------------------------------------------------------
 /* test instruction block */
 
-var testIns = ['<div style="text-align:left; border:0px solid; padding:10px;' +
-	'                          width:800px; float:none; font-size:100%">' +
-	'<p>For the next few trials, you will be shown some more pictures, ' +
-	'but you will NOT be shown feedback about whether a shock occurred.</p>' +
-	'<p>You will still be making predictions about whether you think a shock will occur or not. ' +
-	'However this time, you will be making a rating on a scale ranging from ' +
-	'"Definitely NO SHOCK" to "Definitely SHOCK". </p>' +
-	'<p>Use your mouse to drag the slider along the scale to make your rating. </p>'
-];
-
 var testInstruction_block = {
 	type: 'instructions',
-	pages: [testIns],
+	pages: [ins.test],
 	allow_keys: false,
 	show_clickable_nav: true
 };
@@ -360,7 +448,7 @@ if (dimCB === 1) {
 }
 
 var testStim = [{
-	stimulus: ['./img/S1.png'],
+	stimulus: ['./img/S1.jpg'],
 	data: {
 		dimVal: 1 + (flipDimVal * -2),
 		trialType: 'GS',
@@ -368,7 +456,7 @@ var testStim = [{
 	}
 },
 {
-	stimulus: ['./img/S2.png'],
+	stimulus: ['./img/S2.jpg'],
 	data: {
 		dimVal: 2 + (flipDimVal * -2),
 		trialType: 'GS',
@@ -376,7 +464,7 @@ var testStim = [{
 	}
 },
 {
-	stimulus: ['./img/S3.png'], 
+	stimulus: ['./img/S3.jpg'], 
 	data: {
 		dimVal: 3 + (flipDimVal * -2),
 		trialType: 'GS',
@@ -384,7 +472,7 @@ var testStim = [{
 	}
 },
 {
-	stimulus: ['./img/S4.png'],
+	stimulus: ['./img/S4.jpg'],
 	data: {
 		dimVal: 4 + (flipDimVal * -2),
 		trialType: 'GS',
@@ -392,7 +480,7 @@ var testStim = [{
 	}
 },
 {
-	stimulus: ['./img/S5.png'],
+	stimulus: ['./img/S5.jpg'],
 	data: {
 		dimVal: 5 + (flipDimVal * -2),
 		trialType: 'GS',
@@ -400,7 +488,7 @@ var testStim = [{
 	}
 },
 {
-	stimulus: ['./img/S6.png'],
+	stimulus: ['./img/S6.jpg'],
 	data: {
 		dimVal: 6 + (flipDimVal * -2),
 		trialType: 'GS',
@@ -408,7 +496,7 @@ var testStim = [{
 	}
 },
 {
-	stimulus: ['./img/S7.png'],
+	stimulus: ['./img/S7.jpg'],
 	data: {
 		dimVal: 7 + (flipDimVal * -2),
 		trialType: 'GS',
@@ -416,7 +504,7 @@ var testStim = [{
 	}
 },
 {
-	stimulus: ['./img/S8.png'],
+	stimulus: ['./img/S8.jpg'],
 	data: {
 		dimVal: 8 + (flipDimVal * -2),
 		trialType: 'GS',
@@ -424,7 +512,7 @@ var testStim = [{
 	}
 },
 {
-	stimulus: ['./img/S9.png'],
+	stimulus: ['./img/S9.jpg'],
 	data: {
 		dimVal: 9 + (flipDimVal * -2),
 		trialType: 'GS',
@@ -432,7 +520,7 @@ var testStim = [{
 	}
 },
 {
-	stimulus: ['./img/S10.png'],
+	stimulus: ['./img/S10.jpg'],
 	data: {
 		dimVal: 10 + (flipDimVal * -2),
 		trialType: 'GS',
@@ -440,7 +528,7 @@ var testStim = [{
 	}
 },
 {
-	stimulus: ['./img/S11.png'],
+	stimulus: ['./img/S11.jpg'],
 	data: {
 		dimVal: 11 + (flipDimVal * -2),
 		trialType: 'GS',
@@ -463,89 +551,64 @@ var testBlock = {
 	max: 100,
 	start: 50,
 	step: 1,
-	prompt: '<center><p>The above picture appears on the machine. ' +
-			'What is the likelihood of this stimulus causing a SHOCK?</p></center>',
+	prompt: prompt.test,
 	post_trial_gap: 2000,
 	timeline: testSeq
 };
-timeline.push(testBlock); 
+//timeline.push(testBlock); 
 
 //--------------------------------------------------------------------------------
 /* define questionnaire instructions */ 
 
-var quesIns1 = ['<div style="text-align:left; border:0px solid; padding:10px;' +
-	'                          width:800px; float:none; font-size:100%">' +
-	'<p>We will now ask you some questions about what you have learned in ' +
-	'the experiment.</p>' +
-	'<p>Please read each option <b>carefully</b> and answer as honestly as you can.</p>' +
-	'<p>You will still receive your payment no matter what.</p>'
-];
-
-var quesIns2 = ['<div style="text-align:left; border:0px solid; padding:10px;' +
-	'                          width:800px; float:none; font-size:100%">' +
-	'<p>There were <b>two</b> parts to this experiment. In the <b>first</b> part you ' +
-	'received feedback for your predictions, and in the <b>second</b> part you did ' +
-	'<b>NOT</b> receive feedback. </p>'
-];
-
 var quesInstruction_block = {
 	type: 'instructions',
-	pages: [quesIns1, quesIns2],
+	pages: [ins.ques1, ins.ques2],
 	allow_keys: false,
 	show_clickable_nav: true
 };
 
-timeline.push(quesInstruction_block); 
+//timeline.push(quesInstruction_block); 
 
 //--------------------------------------------------------------------------------
 /* define questionnaire */ 
 
-// feature importance
-var likertLabels = ['Definitely untrue', 'Probably untrue', 'Neutral', 'Probably true', 'Definitely true'];
+var questionnaire = {};
 
-var questionnaire = {
+questionnaire.feat = {
 	type: 'survey-likert',
 	questions: [
-	{prompt: 'In the <b>FIRST</b> part of the experiment, the <b>SHAPE</b> of the symbol ' +
-	'determined whether a shock occurred: ', labels: likertLabels}, 
-	{prompt: 'In the <b>FIRST</b> part of the experiment, the <b>COLOR</b> of the symbol ' +
-	'determined whether a shock occurred: ', labels: likertLabels},
-    {prompt: 'In the <b>SECOND</b> part of the experiment, the <b>SHAPE</b> of the symbol ' +
-	'determined whether a shock occurred: ', labels: likertLabels},
-    {prompt: 'In the <b>SECOND</b> part of the experiment, the <b>COLOR</b> of the symbol ' +
-	'determined whether a shock occurred: ', labels: likertLabels}
+	{prompt: ques.feat1, labels: ques.likertLabels, required: true}, 
+	{prompt: ques.feat2, labels: ques.likertLabels, required: true}, 
+	{prompt: ques.feat3, labels: ques.likertLabels, required: true}, 
+	{prompt: ques.feat4, labels: ques.likertLabels, required: true}, 
 	]
 };
-timeline.push(questionnaire); 
+timeline.push(questionnaire.feat); 
 
-// forced-choice questions
-var questionnaireFC = {
+// forced-choice questions about rules
+questionnaire.rule = {
 	type: 'survey-multi-choice',
 	questions: [
-		{prompt: '<font size="+2">If you had to choose, which of the following do you believe is <b>most</b> correct? </font>',
-		options: ['Only a specific colored symbol (and those similar to it) led to shock',
-		'Colored symbols led to shock',
-		'The greener the symbol, the greater the likelihood of shock',
-		'The bluer the symbol, the greater the likelihood of shock'],
+		{prompt: ques.rulePrompt,
+		options: ques.ruleOptions,
 		required: true, horizontal: false}
 	],
-	preamble: '<font size="-1">Please read through each option <b>carefully</b></font>'
+	preamble: ques.rulePreamble
 };
-timeline.push(questionnaireFC); 
-//-------------------------------------------------------------------------------- 
+timeline.push(questionnaire.rule); 
+ 
 /* manipulation check */
 
-var manCheck = {
+questionnaire.manCheck = {
 	type: 'survey-multi-choice',
 	questions: [
-		{prompt: '<font size="+2">Did you believe that the symbols you saw in the <b>first</b> part of the experiment were: </font>',
-		options: ['Randomly selected',
-		'Selected on purpose in order to be helpful'],
+		{prompt: ques.manCheckPrompt,
+		options: ques.manCheckOptions,
 		required: true, horizontal: false}
 	],
-	preamble: '<font size="-1">Please be as <b>honest</b> as possible. You will still receive your payment. </font>'
+	preamble: ques.manCheckPreamble
 };
-timeline.push(manCheck); 
+timeline.push(questionnaire.manCheck); 
 
 //--------------------------------------------------------------------------------  
 /* start by running the "welcome.js" script */

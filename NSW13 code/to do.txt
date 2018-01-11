@@ -18,3 +18,13 @@ CHECK DURING PILOTING
 ====================================================================
 - Recording data okay
 - Recording movement away from experiment (using jspsych)
+
+
+
+Loop, stuck in dragging until 1/2 cards dragged to top
+Look up "Get last click" in javascript
+Function executes when button is clicked, callback, look at coordinates
+Could make stimuli buttons in grid
+VSL grid - outputs strings (grid_stimulus)
+	- choices: string as image???
+

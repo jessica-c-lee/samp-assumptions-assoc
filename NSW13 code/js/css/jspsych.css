@@ -322,3 +322,26 @@ label.jspsych-survey-multi-choice-text input[type="radio"] {
   margin-left: auto;
   margin-right: auto;
 }
+
+/** PLUGIN: jspsych-html-click custom function modified from button-press **/
+.clickable {
+    border: 1px solid #333;
+    background: #eee;
+    height: 870px; width: 520px;
+    margin: 15px;
+    position: center;
+}
+.display {
+    display: block;
+    height: 16px;
+    position: absolute;
+    text-align: center;
+    vertical-align: middle;
+    width: 100%;
+    top: 50%; margin-top: -8px;
+}
+.log {
+    display: block;
+    position: absolute;
+    top: 220px;
+}

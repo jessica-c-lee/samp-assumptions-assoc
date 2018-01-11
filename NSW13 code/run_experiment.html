@@ -7,7 +7,9 @@
 	<script src="./js/jspsych.js"></script>
 	<script src="./js/plugins/jspsych-instructions.js"></script>
 	<script src="./js/plugins/jspsych-html-button-response.js"></script>
+	<script src="./js/plugins/jspsych-html-click.js"></script>
 	<script src="./js/plugins/jspsych-free-sort.js"></script>
+	<script src="./js/plugins/jspsych-vsl-grid-scene.js"></script>
 	<script src="./js/plugins/jspsych-categorize-image.js"></script>
 	<script src="./js/plugins/jspsych-image-slider-response.js"></script>
 	<script src="./js/plugins/jspsych-survey-multi-choice.js"></script>
@@ -19,7 +21,8 @@
 </head>
 
 <body>
-	<div id="welcome"></div>       
+	<div id="welcome"></div> 
+	 <!-- <div class="clickable"></div>  -->   
 </body>
 
 <script>
@@ -37,6 +40,8 @@ var numTestStim = 11; // number of test stimuli
 var images = [
 './img/plain_card.jpg', 
 './img/marked_card.jpg',
+'./img/plain_card_small.jpg', 
+'./img/marked_card_small.jpg',
 './img/S1.jpg', 
 './img/S2.jpg',
 './img/S3.jpg',
@@ -57,16 +62,6 @@ if (group === 'single pos') {
 } else if (group === 'distant neg') {
 	var numCards = '2 cards';
 }
-
-// if (sampGroup === 'helpful') {
-// 	var sampManPrompt = '<p>Now you will see the stimuli we have selected for you. </p>' +
-// 		'<p>In the next phase, you will learn whether these stimuli cause a SHOCK, or not. </p>';
-// 	var chosenCards = ['./img/marked_card.jpg','./img/marked_card.jpg'];
-// } else if (sampGroup === 'random') {
-// 	var sampManPrompt = '<p>Now you will see the stimuli you selected at random. </p>' +
-// 		'<p>In the next phase, you will learn whether these stimuli cause a SHOCK, or not. </p>';
-// 	var chosenCards = ['./img/plain_card.jpg','./img/plain_card.jpg'];
-// }
 
 //--------------------------------------------------------------------------------  
 /* initialise timeline*/
@@ -121,7 +116,16 @@ var ins = {};
 ins.train1 = [
 	'<div style="text-align:left; border:0px solid; padding:10px;' +
 	'                          width:800px; float:none; font-size:100%">' +
-	'<p>In this experiment we are interested in how you learn from limited evidence. ' +
+	'<p>In this experiment we are interested in how you make predictions from ' +
+	' <b>limited</b> evidence. ' +
+	'<p>The experiment is composed of three parts. </p>' +
+	'<p>In the FIRST part you will learn whether different symbols cause an outcome. ' +
+	'On each trial, you will make a prediction, and will be given feedback. </p>' +
+	'<p> In the SECOND part you will be presented with some more symbols, ' +
+	'and asked to make predictions. But this time, you will NOT be given feedback. </p>'
+];
+
+ins.train2 = [
 	'In the trials that follow, you will be asked to make predictions about outcomes ' +
 	'based on the stimuli presented. Please try and be as accurate as possible in ' +
 	'your predictions. </p>' +
@@ -134,7 +138,7 @@ ins.train1 = [
 	'will occur. </p>'
 ];
 
-ins.train2 = [
+ins.train3 = [
 	'<div style="text-align:left; border:0px solid; padding:10px;' +
 	'                          width:800px; float:none; font-size:100%">' +
 	'<p>As we mentioned before, we are interested in how you make predictions ' +
@@ -243,7 +247,7 @@ ques.manCheckPreamble = '<font size="-1">Please be as <b>honest</b> as possible.
 /* training instruction block */
 var trainInstruction_block = {
 	type: 'instructions',
-	pages: [ins.train1, ins.train2, ins.samp1],
+	pages: [ins.train1, ins.train2, ins.train3, ins.samp1],
 	allow_keys: false,
 	show_clickable_nav: true
 };
@@ -252,47 +256,42 @@ introloop.push(trainInstruction_block); // <- the setup block gets pushed to a "
 //--------------------------------------------------------------------------------
 /* sampling manipulation */
 
-// using free-sort
-// if (sampGroup === 'helpful') {
-// 	sampManIns = ['<p>Please drag the <b>' + numCards + '</b> that we have selected for you (marked with an X) to the <b>top</b> of the screen. </p>' +
-// 		'<p>Drag all other cards to the bottom of the screen, you will not see these symbols. </p>'];
-// } else if (sampGroup === 'random') {
-// 	sampManIns = ['<p>Please randomly choose <b>' + numCards + '</b> and drag to the <b>top</b> of the screen. </p>' +
-// 	'<p>Drag all other cards to the bottom of the screen, you will not see these symbols.</p>'];
+// create grid of cards
+var numGridCards = 20;
+var image_size = 2;
+
+var pattern = [
+['./img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg'],
+['./img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg'],
+['./img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg'],
+['./img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg'],
+['./img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg'],
+['./img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg']
+];
+
+// mark two cards at random in helpful condition
+
+// create grid stimulus
+var grid_stimulus = jsPsych.plugins['vsl-grid-scene'].generate_stimulus(pattern, image_size);
+
+var xPos = {};
+var yPos = {};
+
+// function getMousePos(e) {
+//     var xPos = e.clientX;
+//     var yPos = e.clientY;
+//     console.log(xPos);
+// 	console.log(yPos);
 // }
 
-// var numSampCards = 20;
+var sampMan = {
+	type: 'html-click',
+	choices: ['Next>'],
+	stimulus: [grid_stimulus + '<center><p>Please choose a card by clicking on it</p></center>']
+	//on_start: document.addEventListener("click", getMousePos, false)
+}
+introloop.push(sampMan)
 
-// var cardList = Array.apply(null, Array(numSampCards)).map(String.prototype.valueOf,'./img/plain_card.jpg')
-
-// if (sampGroup === 'helpful') {
-// 	if (group === 'single pos') {
-// 		cardList = Array.apply(null, Array(numSampCards-1)).map(String.prototype.valueOf,'./img/plain_card.jpg');
-// 		cardList = cardList.concat('./img/marked_card.jpg');
-// 	} else if (group === 'distant neg') {
-// 		cardList = Array.apply(null, Array(numSampCards-2)).map(String.prototype.valueOf,'./img/plain_card.jpg');
-// 		cardList = cardList.concat(['./img/marked_card.jpg', './img/marked_card.jpg']);
-// 	}
-// }
-
-// // "choose" cards
-// var sampMan = {
-// 	type: 'free-sort',
-// 	stimuli: cardList,
-// 	stim_height: 180,
-// 	stim_width: 120,
-// 	prompt: sampManIns,
-// }
-// introloop.push(sampMan);
-
-// // show stimuli chosen
-// var showChosenStim = {
-// 	type: 'html-button-response',
-// 	choices: ['Click here to see the stimuli'],
-// 	prompt: sampManPrompt,
-// 	stimuli: chosenCards,
-// }
-// introloop.push(showChosenStim);
 
 //--------------------------------------------------------------------------------
 /* instruction check questions */ 
@@ -424,7 +423,7 @@ var trainBlock = {
 	post_trial_gap: 2000,
 	timeline: trainSeq
 };
-//timeline.push(trainBlock); 
+timeline.push(trainBlock); 
 
 //--------------------------------------------------------------------------------
 /* test instruction block */
@@ -555,7 +554,7 @@ var testBlock = {
 	post_trial_gap: 2000,
 	timeline: testSeq
 };
-//timeline.push(testBlock); 
+timeline.push(testBlock); 
 
 //--------------------------------------------------------------------------------
 /* define questionnaire instructions */ 

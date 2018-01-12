@@ -257,39 +257,97 @@ introloop.push(trainInstruction_block); // <- the setup block gets pushed to a "
 /* sampling manipulation */
 
 // create grid of cards
-var numGridCards = 20;
-var image_size = 2;
+var image_size = 20;
+var grid = {};
+grid.across = 6;
+grid.down = 6;
+grid.width = 516;
+grid.height = 852;
+var row1 = 0;
+var col1 = 0;
+var row2 = 0;
+var col2 = 0;
 
-var pattern = [
-['./img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg'],
-['./img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg'],
-['./img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg'],
-['./img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg'],
-['./img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg'],
-['./img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg', './img/plain_card_small.jpg']
-];
-
-// mark two cards at random in helpful condition
+function fillArray(value, length) {
+  var arr = [];
+  for (var i = 0; i < length; i++) {
+    arr.push(value);
+  }
+  return arr;
+}
 
 // create grid stimulus
+grid.row = fillArray('./img/plain_card_small.jpg',grid.across);
+grid.markedrow1 = fillArray('./img/plain_card_small.jpg',grid.across);
+grid.markedrow2 = fillArray('./img/plain_card_small.jpg',grid.across);
+var pattern = [
+grid.row, grid.row, grid.row, grid.row, grid.row, grid.row
+];
+
+// mark two cards at random in helpful condition (row/col indices)
+indices = [0,1,2,3,4,5];
+if (sampGroup === 'helpful') {
+	if (group === 'single pos') {
+		row1 = jsPsych.randomization.sampleWithoutReplacement(indices, 1);
+		col1 = jsPsych.randomization.sampleWithoutReplacement(indices, 1);
+		grid.markedrow1[col1] = './img/marked_card_small.jpg';
+		pattern[row1] = grid.markedrow1;
+	} else if (group === 'distant neg') {
+		row1 = jsPsych.randomization.sampleWithoutReplacement(indices, 1);
+		col1 = jsPsych.randomization.sampleWithoutReplacement(indices, 1);
+		row2 = jsPsych.randomization.sampleWithoutReplacement(indices, 1);
+		col2 = jsPsych.randomization.sampleWithoutReplacement(indices, 1);
+		grid.markedrow1[col1] = './img/marked_card_small.jpg';
+		pattern[row1] = grid.markedrow1;
+		grid.markedrow2[col2] = './img/marked_card_small.jpg';
+		pattern[row2] = grid.markedrow2;
+	}
+}
+
+// make stimulus
 var grid_stimulus = jsPsych.plugins['vsl-grid-scene'].generate_stimulus(pattern, image_size);
 
-var xPos = {};
-var yPos = {};
-
-// function getMousePos(e) {
-//     var xPos = e.clientX;
-//     var yPos = e.clientY;
-//     console.log(xPos);
-// 	console.log(yPos);
-// }
-
+// present initial grid, wait for response
 var sampMan = {
 	type: 'html-click',
-	choices: ['Next>'],
-	stimulus: [grid_stimulus + '<center><p>Please choose a card by clicking on it</p></center>']
-	//on_start: document.addEventListener("click", getMousePos, false)
+	choices: ['Continue'],
+	button_html: '<button class="jspsych-btn">%choice%</button>',
+	stimulus: [grid_stimulus + '<center><p>Please choose a card by clicking on it</p></center>'],
+	data: {
+		row1: row1,
+		col1: col1,
+		row2: row2,
+		col2: col2
+	on_finish: function getChosenCards() {
+		
+		var ycoord = y;
+		switch (var xcoord = x) {
+			case xcoord < grid.width/grid.across:
+				var rowIdx = 0;
+				break;
+			case xcoord >= grid.width/grid.across:
+				var rowIdx = 1;
+				break;
+			case xcoord < grid.width/grid.across:
+				var rowIdx = 2;
+				break;							
+			case xcoord < grid.width/grid.across:
+				var rowIdx = 3;
+				break;
+			case xcoord < grid.width/grid.across:
+				var rowIdx = 4;
+				break;
+			case xcoord < grid.width/grid.across:
+				var rowIdx = 5;
+				break;
+		}
+		jsPsych.data.addProperties({x:x, y:y});
+	},
+
+	}
 }
+var getClickNow = false; // so previous mouseclicks aren't registered
+var clickCounter = 0;
 introloop.push(sampMan)
 
 

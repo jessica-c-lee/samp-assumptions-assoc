@@ -327,7 +327,7 @@ label.jspsych-survey-multi-choice-text input[type="radio"] {
 .clickable {
     border: 1px solid #333;
     background: #eee;
-    height: 870px; width: 520px;
+    height: 852px; width: 516px;
     margin: 15px;
     position: center;
 }
@@ -344,4 +344,9 @@ label.jspsych-survey-multi-choice-text input[type="radio"] {
     display: block;
     position: absolute;
     top: 220px;
+}
+.jspsych-html-click-btngroup button {
+  margin: 20px;
+  margin.horizontal: 100px;
+  margin.vertical: 100px;
 }

@@ -57,7 +57,7 @@ jsPsych.plugins["html-click"] = (function() {
       margin_vertical: {
         type: jsPsych.plugins.parameterType.STRING,
         pretty_name: 'Margin vertical',
-        default: '0px',
+        default: '50px', // originally 0
         description: 'The vertical margin of the button.'
       },
       margin_horizontal: {
@@ -79,7 +79,23 @@ jsPsych.plugins["html-click"] = (function() {
   plugin.trial = function(display_element, trial) {
 
     // display stimulus
-    display_element.innerHTML = '<center><div class="clickable" id="jspsych-html-click-stimulus">'+trial.stimulus+'</div></center>'; // added clickable class to stimulus, and centered
+    display_element.innerHTML = '<div class="clickable" id="jspsych-html-click-stimulus">'+trial.stimulus+'</div>'; // added clickable class to stimulus
+
+    // add event listener
+    display_element.addEventListener('click', getClickPos, false);
+
+    function getClickPos(e) {
+      if (getClickNow === true) {
+        var x = e.clientX - display_element.offsetLeft;
+        var y = e.clientY - display_element.offsetTop;
+        console.log(display_element.offsetLeft);
+        console.log(display_element.offsetTop);
+        console.log(x);
+        console.log(y);
+      } else if (getClickNow === false) {
+        getClickNow = true;
+      }
+    }
 
     //display buttons
     var buttons = [];
@@ -94,25 +110,12 @@ jsPsych.plugins["html-click"] = (function() {
         buttons.push(trial.button_html);
       }
     }
-    display_element.innerHTML += '<center><div id="jspsych-html-click-btngroup"></div></center>'; // modified by JL, centered
+    display_element.innerHTML += '<center><div id="jspsych-html-click-btngroup"></div></center>'; //centered JL
     for (var i = 0; i < trial.choices.length; i++) {
       var str = buttons[i].replace(/%choice%/g, trial.choices[i]);
       display_element.querySelector('#jspsych-html-click-btngroup').insertAdjacentHTML('beforeend',
         '<div class="jspsych-html-click-button" style="display: inline-block; margin:'+trial.margin_vertical+' '+trial.margin_horizontal+'" id="jspsych-html-click-button-' + i +'" data-choice="'+i+'">'+str+'</div>');
       display_element.querySelector('#jspsych-html-click-button-' + i).addEventListener('click', function(e){
-
-        var clicks = [],
-            updatedClicks = "";
-        $('.clickable').bind('click', function (ev) {
-            var $div = $(ev.target);
-            var $display = $div.find('.display');
-            
-            var offset = $div.offset();
-            var x = ev.clientX - offset.left;
-            var y = ev.clientY - offset.top;
-        });
-        console.log(x);
-        console.log(y);
         var choice = e.currentTarget.getAttribute('data-choice'); // don't use dataset for jsdom compatibility
         after_response(choice);
      });

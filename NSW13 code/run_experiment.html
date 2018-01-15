@@ -42,6 +42,7 @@ var images = [
 './img/marked_card.jpg',
 './img/plain_card_small.jpg', 
 './img/marked_card_small.jpg',
+'./img/faded_card_small.jpg',
 './img/S1.jpg', 
 './img/S2.jpg',
 './img/S3.jpg',
@@ -307,6 +308,9 @@ if (sampGroup === 'helpful') {
 // make stimulus
 var grid_stimulus = jsPsych.plugins['vsl-grid-scene'].generate_stimulus(pattern, image_size);
 
+// var sampSeq = [];
+// sampSeq[0] = pattern;
+
 // present initial grid, wait for response
 var sampMan = {
 	type: 'html-click',
@@ -318,36 +322,11 @@ var sampMan = {
 		col1: col1,
 		row2: row2,
 		col2: col2
-	on_finish: function getChosenCards() {
-		
-		var ycoord = y;
-		switch (var xcoord = x) {
-			case xcoord < grid.width/grid.across:
-				var rowIdx = 0;
-				break;
-			case xcoord >= grid.width/grid.across:
-				var rowIdx = 1;
-				break;
-			case xcoord < grid.width/grid.across:
-				var rowIdx = 2;
-				break;							
-			case xcoord < grid.width/grid.across:
-				var rowIdx = 3;
-				break;
-			case xcoord < grid.width/grid.across:
-				var rowIdx = 4;
-				break;
-			case xcoord < grid.width/grid.across:
-				var rowIdx = 5;
-				break;
-		}
-		jsPsych.data.addProperties({x:x, y:y});
-	},
-
 	}
 }
 var getClickNow = false; // so previous mouseclicks aren't registered
 var clickCounter = 0;
+var clickedOn = false;
 introloop.push(sampMan)
 
 

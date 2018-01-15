@@ -75,11 +75,10 @@ jsPsych.plugins["html-click"] = (function() {
     }
   }
 
-
   plugin.trial = function(display_element, trial) {
 
     // display stimulus
-    display_element.innerHTML = '<div class="clickable" id="jspsych-html-click-stimulus">'+trial.stimulus+'</div>'; // added clickable class to stimulus
+    display_element.innerHTML = '<div class="clickable" id="jspsych-html-click-stimulus">'+trial.stimulus+'</div>'; // add clickable class to stimulus
 
     // add event listener
     display_element.addEventListener('click', getClickPos, false);
@@ -88,10 +87,152 @@ jsPsych.plugins["html-click"] = (function() {
       if (getClickNow === true) {
         var x = e.clientX - display_element.offsetLeft;
         var y = e.clientY - display_element.offsetTop;
-        console.log(display_element.offsetLeft);
-        console.log(display_element.offsetTop);
-        console.log(x);
-        console.log(y);
+        var ycoord = y;
+        var xcoord = x
+        var colIdx = -1;
+        var rowIdx = -1;
+        if (xcoord < (grid.width/grid.across)*1+1) {
+          colIdx = 0;
+        } else if (xcoord < (grid.width/grid.across)*2+1 && xcoord >= (grid.width/grid.across)*1) {
+          colIdx = 1;
+        } else if (xcoord < (grid.width/grid.across)*3+1 && xcoord >= (grid.width/grid.across)*2) {
+          colIdx = 2;
+        } else if (xcoord < (grid.width/grid.across)*4+1 && xcoord >= (grid.width/grid.across)*3) {
+          colIdx = 3;
+        } else if (xcoord < (grid.width/grid.across)*5+1 && xcoord >= (grid.width/grid.across)*4) {
+          colIdx = 4;
+        } else if (xcoord < (grid.width/grid.across)*6+1 && xcoord >= (grid.width/grid.across)*5) {
+          colIdx = 5;
+        }
+        if (ycoord < (grid.height/grid.down)*1+1) {
+          rowIdx = 0;
+        } else if (ycoord < (grid.height/grid.down)*2+1 && ycoord >= (grid.height/grid.down)*1) {
+          rowIdx = 1;
+        } else if (ycoord < (grid.height/grid.down)*3+1 && ycoord >= (grid.height/grid.down)*2) {
+          rowIdx = 2;
+        } else if (ycoord < (grid.height/grid.down)*4+1 && ycoord >= (grid.height/grid.down)*3) {
+          rowIdx = 3;
+        } else if (ycoord < (grid.height/grid.down)*5+1 && ycoord >= (grid.height/grid.down)*4) {
+          rowIdx = 4;
+        } else if (ycoord < (grid.height/grid.down)*6+1 && ycoord >= (grid.height/grid.down)*5) {
+          rowIdx = 5;
+        }
+        clickedOn = true;
+        clickCounter = clickCounter + 1;
+
+        // update stimulus display
+        grid.faded = ['./img/faded_card_small.jpg','./img/faded_card_small.jpg','./img/faded_card_small.jpg',
+        './img/faded_card_small.jpg','./img/faded_card_small.jpg','./img/faded_card_small.jpg'];
+        grid.faded1 = ['./img/faded_card_small.jpg','./img/faded_card_small.jpg','./img/faded_card_small.jpg',
+        './img/faded_card_small.jpg','./img/faded_card_small.jpg','./img/faded_card_small.jpg'];
+        var newPattern = [grid.faded, grid.faded, grid.faded, grid.faded, grid.faded, grid.faded];
+        grid.faded1[colIdx] = './img/marked_card_small.jpg';
+        newPattern[rowIdx] = grid.faded1;
+        // make stimulus
+        var new_grid_stimulus = jsPsych.plugins['vsl-grid-scene'].generate_stimulus(newPattern, image_size);
+        trial.stimulus = [new_grid_stimulus + '<center><p>Please choose a card by clicking on it</p></center>'];
+        //return(trial.stimulus);
+        display_element.innerHTML = '<div class="clickable" id="jspsych-html-click-stimulus">'+trial.stimulus+'</div>'; // remove clickable class to stimulus
+
+         //display buttons
+        var buttons = [];
+        if (Array.isArray(trial.button_html)) {
+          if (trial.button_html.length == trial.choices.length) {
+            buttons = trial.button_html;
+          } else {
+            console.error('Error in html-click plugin. The length of the button_html array does not equal the length of the choices array');
+          }
+        } else {
+          for (var i = 0; i < trial.choices.length; i++) {
+            buttons.push(trial.button_html);
+          }
+        }
+        display_element.innerHTML += '<center><div id="jspsych-html-click-btngroup"></div></center>'; //centered JL
+        for (var i = 0; i < trial.choices.length; i++) {
+          var str = buttons[i].replace(/%choice%/g, trial.choices[i]);
+          display_element.querySelector('#jspsych-html-click-btngroup').insertAdjacentHTML('beforeend',
+            '<div class="jspsych-html-click-button" style="display: inline-block; margin:'+trial.margin_vertical+' '+trial.margin_horizontal+'" id="jspsych-html-click-button-' + i +'" data-choice="'+i+'">'+str+'</div>');
+          display_element.querySelector('#jspsych-html-click-button-' + i).addEventListener('click', function(e){
+            var choice = e.currentTarget.getAttribute('data-choice'); // don't use dataset for jsdom compatibility
+            after_response(choice);
+         });
+        }
+
+        //show prompt if there is one
+        if (trial.prompt !== null) {
+          display_element.insertAdjacentHTML('beforeend', trial.prompt);
+        }
+
+        // function to handle responses by the subject
+    function after_response(choice) {
+
+      // measure rt
+      var end_time = Date.now();
+      var rt = end_time - start_time;
+      response.button = choice;
+      response.rt = rt;
+
+      // after a valid response, the stimulus will have the CSS class 'responded'
+      // which can be used to provide visual feedback that a response was recorded
+      display_element.querySelector('#jspsych-html-click-stimulus').className += ' responded';
+
+      // disable all the buttons after a response
+      var btns = document.querySelectorAll('.jspsych-html-click-button button');
+      for(var i=0; i<btns.length; i++){
+        //btns[i].removeEventListener('click');
+        btns[i].setAttribute('disabled', 'disabled');
+      }
+
+      if (trial.response_ends_trial) {
+        end_trial();
+      }
+      // force trial to end (otherwise gets stuck in loop)
+      jsPsych.data.addProperties({
+      xcoord: xcoord,
+      ycoord: ycoord,
+      rowIdx: rowIdx,
+      colIdx: colIdx
+  });
+      trial.response_ends_trial = true; //end_trial(); 
+    };
+
+    // function to end trial when it is time
+    function end_trial() {
+
+      // kill any remaining setTimeout handlers
+      jsPsych.pluginAPI.clearAllTimeouts();
+
+      // gather the data to store for the trial
+      var trial_data = {
+        "rt": response.rt,
+        "stimulus": trial.stimulus,
+        "button_pressed": response.button
+      };
+
+      // clear the display
+      display_element.innerHTML = '';
+
+      // move on to the next trial
+      jsPsych.finishTrial(trial_data);
+    };
+
+    // start timing
+    start_time = Date.now();
+
+    // hide image if timing is set
+    if (trial.stimulus_duration !== null) {
+      jsPsych.pluginAPI.setTimeout(function() {
+        display_element.querySelector('#jspsych-html-click-stimulus').style.visibility = 'hidden';
+      }, trial.stimulus_duration);
+    }
+
+    // end trial if time limit is set
+    if (trial.trial_duration !== null) {
+      jsPsych.pluginAPI.setTimeout(function() {
+        end_trial();
+      }, trial.trial_duration);
+    }
+        /////////////////////////////////////////////////////////
       } else if (getClickNow === false) {
         getClickNow = true;
       }
@@ -135,67 +276,7 @@ jsPsych.plugins["html-click"] = (function() {
     // start time
     var start_time = 0;
 
-    // function to handle responses by the subject
-    function after_response(choice) {
-
-      // measure rt
-      var end_time = Date.now();
-      var rt = end_time - start_time;
-      response.button = choice;
-      response.rt = rt;
-
-      // after a valid response, the stimulus will have the CSS class 'responded'
-      // which can be used to provide visual feedback that a response was recorded
-      display_element.querySelector('#jspsych-html-click-stimulus').className += ' responded';
-
-      // disable all the buttons after a response
-      var btns = document.querySelectorAll('.jspsych-html-click-button button');
-      for(var i=0; i<btns.length; i++){
-        //btns[i].removeEventListener('click');
-        btns[i].setAttribute('disabled', 'disabled');
-      }
-
-      if (trial.response_ends_trial) {
-        end_trial();
-      }
-    };
-
-    // function to end trial when it is time
-    function end_trial() {
-
-      // kill any remaining setTimeout handlers
-      jsPsych.pluginAPI.clearAllTimeouts();
-
-      // gather the data to store for the trial
-      var trial_data = {
-        "rt": response.rt,
-        "stimulus": trial.stimulus,
-        "button_pressed": response.button
-      };
-
-      // clear the display
-      display_element.innerHTML = '';
-
-      // move on to the next trial
-      jsPsych.finishTrial(trial_data);
-    };
-
-    // start timing
-    start_time = Date.now();
-
-    // hide image if timing is set
-    if (trial.stimulus_duration !== null) {
-      jsPsych.pluginAPI.setTimeout(function() {
-        display_element.querySelector('#jspsych-html-click-stimulus').style.visibility = 'hidden';
-      }, trial.stimulus_duration);
-    }
-
-    // end trial if time limit is set
-    if (trial.trial_duration !== null) {
-      jsPsych.pluginAPI.setTimeout(function() {
-        end_trial();
-      }, trial.trial_duration);
-    }
+    
 
   };
 

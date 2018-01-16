@@ -5,7 +5,7 @@ NSW13 To Do
 - Change timing for instructions screens
 - Centre everything like welcome.js, relative to window width??
 - Make stimulus appear first, and then questions/ratings etc. (training and test)
-- Sampling manipulation: go to next trial after card selected
+- Sampling manipulation: restart trial if participant didn't click on marked card
 
 Leave until the end:
 - Change text of welcome.js

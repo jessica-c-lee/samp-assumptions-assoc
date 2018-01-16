@@ -264,10 +264,8 @@ grid.across = 6;
 grid.down = 6;
 grid.width = 516;
 grid.height = 852;
-var row1 = 0;
-var col1 = 0;
-var row2 = 0;
-var col2 = 0;
+var row = [-1,-1];
+var col = [-1,-1];
 
 function fillArray(value, length) {
   var arr = [];
@@ -277,58 +275,67 @@ function fillArray(value, length) {
   return arr;
 }
 
-// create grid stimulus
-grid.row = fillArray('./img/plain_card_small.jpg',grid.across);
-grid.markedrow1 = fillArray('./img/plain_card_small.jpg',grid.across);
-grid.markedrow2 = fillArray('./img/plain_card_small.jpg',grid.across);
-var pattern = [
-grid.row, grid.row, grid.row, grid.row, grid.row, grid.row
-];
+// create grid stimulus of cards
+grid.row = fillArray('./img/plain_card_small.jpg', grid.across);
+grid.markedrow1 = fillArray('./img/plain_card_small.jpg', grid.across);
+grid.markedrow2 = fillArray('./img/plain_card_small.jpg', grid.across);
+var pattern1 = [grid.row, grid.row, grid.row, grid.row, grid.row, grid.row];
+var pattern2 = [grid.row, grid.row, grid.row, grid.row, grid.row, grid.row];
+// using faded cards
+grid.faded = fillArray('./img/faded_card_small.jpg', grid.across);
+grid.fadedNew = fillArray('./img/faded_card_small.jpg', grid.across);
+var newPattern = [grid.faded, grid.faded, grid.faded, grid.faded, grid.faded, grid.faded];
 
-// mark two cards at random in helpful condition (row/col indices)
+// mark two cards at random in helpful condition in separate grids
 indices = [0,1,2,3,4,5];
 if (sampGroup === 'helpful') {
-	if (group === 'single pos') {
-		row1 = jsPsych.randomization.sampleWithoutReplacement(indices, 1);
-		col1 = jsPsych.randomization.sampleWithoutReplacement(indices, 1);
-		grid.markedrow1[col1] = './img/marked_card_small.jpg';
-		pattern[row1] = grid.markedrow1;
-	} else if (group === 'distant neg') {
-		row1 = jsPsych.randomization.sampleWithoutReplacement(indices, 1);
-		col1 = jsPsych.randomization.sampleWithoutReplacement(indices, 1);
-		row2 = jsPsych.randomization.sampleWithoutReplacement(indices, 1);
-		col2 = jsPsych.randomization.sampleWithoutReplacement(indices, 1);
-		grid.markedrow1[col1] = './img/marked_card_small.jpg';
-		pattern[row1] = grid.markedrow1;
-		grid.markedrow2[col2] = './img/marked_card_small.jpg';
-		pattern[row2] = grid.markedrow2;
+	row[0] = jsPsych.randomization.sampleWithoutReplacement(indices, 1);
+	col[0] = jsPsych.randomization.sampleWithoutReplacement(indices, 1);
+	grid.markedrow1[col[0]] = './img/marked_card_small.jpg';
+	pattern1[row[0]] = grid.markedrow1;
+	if (group === 'distant neg') {
+		row[1] = jsPsych.randomization.sampleWithoutReplacement(indices, 1);
+		col[1] = jsPsych.randomization.sampleWithoutReplacement(indices, 1);
+		grid.markedrow2[col[1]] = './img/marked_card_small.jpg';
+		pattern2[row[1]] = grid.markedrow2;
 	}
 }
 
-// make stimulus
-var grid_stimulus = jsPsych.plugins['vsl-grid-scene'].generate_stimulus(pattern, image_size);
+// make stimuli (second stim only presented in Dist Neg group)
+var grid_stimulus1 = jsPsych.plugins['vsl-grid-scene'].generate_stimulus(pattern1, image_size);
+var grid_stimulus2 = jsPsych.plugins['vsl-grid-scene'].generate_stimulus(pattern2, image_size);
 
-// var sampSeq = [];
-// sampSeq[0] = pattern;
-
-// present initial grid, wait for response
+// present first grid
 var sampMan = {
 	type: 'html-click',
 	choices: ['Continue'],
 	button_html: '<button class="jspsych-btn">%choice%</button>',
-	stimulus: [grid_stimulus + '<center><p>Please choose a card by clicking on it</p></center>'],
+	stimulus: [grid_stimulus1 + '<center><p>Please choose a card by clicking on it</p></center>'],
 	data: {
-		row1: row1,
-		col1: col1,
-		row2: row2,
-		col2: col2
-	}
-}
+		row: row,
+		col: col
+	},
+	post_trial_gap: 1000
+};
 var getClickNow = false; // so previous mouseclicks aren't registered
 var clickCounter = 0;
 var clickedOn = false;
 introloop.push(sampMan)
 
+// present second grid for Dist Neg group
+if (group === 'distant neg') {
+	var sampMan2 = {
+		type: 'html-click',
+		choices: ['Continue'],
+		button_html: '<button class="jspsych-btn">%choice%</button>',
+		stimulus: [grid_stimulus2 + '<center><p>Please choose a card by clicking on it</p></center>'],
+		post_trial_gap: 1000
+	};
+var getClickNow = false; // so previous mouseclicks aren't registered
+var clickCounter = 0;
+var clickedOn = false;
+introloop.push(sampMan2)
+}
 
 //--------------------------------------------------------------------------------
 /* instruction check questions */ 
@@ -603,7 +610,7 @@ var quesInstruction_block = {
 	show_clickable_nav: true
 };
 
-//timeline.push(quesInstruction_block); 
+timeline.push(quesInstruction_block); 
 
 //--------------------------------------------------------------------------------
 /* define questionnaire */ 

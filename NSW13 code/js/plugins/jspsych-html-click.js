@@ -1,8 +1,8 @@
 /**
- * jspsych-html-click (modified from button-press plugin by Jess)
- * Josh de Leeuw
+ * jspsych-html-click (modified from button-press plugin by Jessica Lee 2018)
+ * Original plugin by Josh de Leeuw
  *
- * plugin for displaying a stimulus and getting a keyboard response
+ * plugin for displaying a stimulus, updating stimulus based on location of mouse click
  *
  * documentation: docs.jspsych.org
  *
@@ -82,15 +82,15 @@ jsPsych.plugins["html-click"] = (function() {
 
     // add event listener
     display_element.addEventListener('click', getClickPos, false);
-    //////////////////////////////////////////////////////////////////////
+
     function getClickPos(e) {
       if (getClickNow === true) {
                 var x = e.clientX - display_element.offsetLeft;
         var y = e.clientY - display_element.offsetTop;
-        var ycoord = y;
-        var xcoord = x
-        var colIdx = -1;
-        var rowIdx = -1;
+        ycoord = y;
+        xcoord = x
+        colIdx = -1;
+        rowIdx = -1;
         if (xcoord < (grid.width/grid.across)*1+1) {
           colIdx = 0;
         } else if (xcoord < (grid.width/grid.across)*2+1 && xcoord >= (grid.width/grid.across)*1) {
@@ -119,43 +119,85 @@ jsPsych.plugins["html-click"] = (function() {
         }
         clickedOn = true;
 
-        // update stimulus display
-        grid.faded = ['./img/faded_card_small.jpg','./img/faded_card_small.jpg','./img/faded_card_small.jpg',
-        './img/faded_card_small.jpg','./img/faded_card_small.jpg','./img/faded_card_small.jpg'];
-        grid.faded1 = ['./img/faded_card_small.jpg','./img/faded_card_small.jpg','./img/faded_card_small.jpg',
-        './img/faded_card_small.jpg','./img/faded_card_small.jpg','./img/faded_card_small.jpg'];
-        var newPattern = [grid.faded, grid.faded, grid.faded, grid.faded, grid.faded, grid.faded];
-        grid.faded1[colIdx] = './img/marked_card_small.jpg';
-        newPattern[rowIdx] = grid.faded1;
-        // make stimulus
-        var new_grid_stimulus = jsPsych.plugins['vsl-grid-scene'].generate_stimulus(newPattern, image_size);
-        trial.stimulus = [new_grid_stimulus + '<center><p>Please choose a card by clicking on it</p></center>'];
-        //return(trial.stimulus);
-        display_element.innerHTML = '<div class="clickable" id="jspsych-html-click-stimulus">'+trial.stimulus+'</div>'; // remove clickable class to stimulus
+        if (rowIdx > -1 && colIdx > -1) { // don't register mouseclicks outside grid
 
-         //display buttons
-        var buttons = [];
-        if (Array.isArray(trial.button_html)) {
-          if (trial.button_html.length == trial.choices.length) {
-            buttons = trial.button_html;
-          } else {
-            console.error('Error in html-click plugin. The length of the button_html array does not equal the length of the choices array');
-          }
-        } else {
-          for (var i = 0; i < trial.choices.length; i++) {
-            buttons.push(trial.button_html);
-          }
-        }
-        display_element.innerHTML += '<center><div id="jspsych-html-click-btngroup"></div></center>'; //centered JL
-        for (var i = 0; i < trial.choices.length; i++) {
-          var str = buttons[i].replace(/%choice%/g, trial.choices[i]);
-          display_element.querySelector('#jspsych-html-click-btngroup').insertAdjacentHTML('beforeend',
-            '<div class="jspsych-html-click-button" style="display: inline-block; margin:'+trial.margin_vertical+' '+trial.margin_horizontal+'" id="jspsych-html-click-button-' + i +'" data-choice="'+i+'">'+str+'</div>');
-          display_element.querySelector('#jspsych-html-click-button-' + i).addEventListener('click', function(e){
-            var choice = e.currentTarget.getAttribute('data-choice'); // don't use dataset for jsdom compatibility
-            after_response(choice);
-         });
-        }
+          if (sampGroup === 'random') {
+
+            // make new grid stimulus, fade out unselected cards
+            var newPattern = [grid.faded, grid.faded, grid.faded, grid.faded, grid.faded, grid.faded];
+            grid.fadedNew = fillArray('./img/faded_card_small.jpg', grid.across);
+            grid.fadedNew[colIdx] = './img/marked_card_small.jpg';
+            newPattern[rowIdx] = grid.fadedNew;
+            var new_grid_stimulus = jsPsych.plugins['vsl-grid-scene'].generate_stimulus(newPattern, image_size);
+            // update stimulus display
+            trial.stimulus = [new_grid_stimulus + '<center><p>Please choose a card by clicking on it</p></center>'];
+            display_element.innerHTML = '<div class="clickable" id="jspsych-html-click-stimulus">'+trial.stimulus+'</div>'; 
+
+            //display buttons
+            var buttons = [];
+            if (Array.isArray(trial.button_html)) {
+              if (trial.button_html.length == trial.choices.length) {
+                buttons = trial.button_html;
+              } else {
+                console.error('Error in html-click plugin. The length of the button_html array does not equal the length of the choices array');
+              }
+            } else {
+              for (var i = 0; i < trial.choices.length; i++) {
+                buttons.push(trial.button_html);
+              }
+            }
+            display_element.innerHTML += '<center><div id="jspsych-html-click-btngroup"></div></center>'; //centered JL
+            for (var i = 0; i < trial.choices.length; i++) {
+              var str = buttons[i].replace(/%choice%/g, trial.choices[i]);
+              display_element.querySelector('#jspsych-html-click-btngroup').insertAdjacentHTML('beforeend',
+                '<div class="jspsych-html-click-button" style="display: inline-block; margin:'+trial.margin_vertical+' '+trial.margin_horizontal+'" id="jspsych-html-click-button-' + i +'" data-choice="'+i+'">'+str+'</div>');
+              display_element.querySelector('#jspsych-html-click-button-' + i).addEventListener('click', function(e){
+                var choice = e.currentTarget.getAttribute('data-choice'); // don't use dataset for jsdom compatibility
+                after_response(choice);
+              });
+            }
+
+          } else if (sampGroup === 'helpful') {
+
+            if (rowIdx == row[clickCounter] && colIdx == col[clickCounter]) {
+              // make new grid stimulus, fade out unselected cards
+              var newPattern = [grid.faded, grid.faded, grid.faded, grid.faded, grid.faded, grid.faded];
+              grid.fadedNew = fillArray('./img/faded_card_small.jpg', grid.across);
+              grid.fadedNew[colIdx] = './img/marked_card_small.jpg';
+              newPattern[rowIdx] = grid.fadedNew;
+              var new_grid_stimulus = jsPsych.plugins['vsl-grid-scene'].generate_stimulus(newPattern, image_size);
+              // update stimulus display
+              trial.stimulus = [new_grid_stimulus + '<center><p>Please choose a card by clicking on it</p></center>'];
+              display_element.innerHTML = '<div class="clickable" id="jspsych-html-click-stimulus">'+trial.stimulus+'</div>'; 
+
+              //display buttons
+              var buttons = [];
+              if (Array.isArray(trial.button_html)) {
+                if (trial.button_html.length == trial.choices.length) {
+                  buttons = trial.button_html;
+                } else {
+                  console.error('Error in html-click plugin. The length of the button_html array does not equal the length of the choices array');
+                }
+              } else {
+                for (var i = 0; i < trial.choices.length; i++) {
+                  buttons.push(trial.button_html);
+                }
+              }
+              display_element.innerHTML += '<center><div id="jspsych-html-click-btngroup"></div></center>'; //centered JL
+              for (var i = 0; i < trial.choices.length; i++) {
+                var str = buttons[i].replace(/%choice%/g, trial.choices[i]);
+                display_element.querySelector('#jspsych-html-click-btngroup').insertAdjacentHTML('beforeend',
+                  '<div class="jspsych-html-click-button" style="display: inline-block; margin:'+trial.margin_vertical+' '+trial.margin_horizontal+'" id="jspsych-html-click-button-' + i +'" data-choice="'+i+'">'+str+'</div>');
+                display_element.querySelector('#jspsych-html-click-button-' + i).addEventListener('click', function(e){
+                  var choice = e.currentTarget.getAttribute('data-choice'); // don't use dataset for jsdom compatibility
+                  after_response(choice);
+                });
+              }
+
+            } // if clicked on marked card
+          } // if random
+        } //if row/col >-1
+
 
         //show prompt if there is one
         if (trial.prompt !== null) {
@@ -186,15 +228,28 @@ jsPsych.plugins["html-click"] = (function() {
           end_trial();
         }
 
-        // force trial to end 
+        // save data
+        var ycoords = [];
+        var xcoords = [];
+        var colIdxs = [];
+        var rowIdxs = [];
+        ycoords[clickCounter] = ycoord;
+        xcoords[clickCounter] = xcoord;
+        colIdxs[clickCounter] = colIdx;
+        rowIdxs[clickCounter] = rowIdx;
         jsPsych.data.addProperties({
           xcoord: xcoord,
           ycoord: ycoord,
           rowIdx: rowIdx,
           colIdx: colIdx
         });
+
         clickCounter = clickCounter + 1;
-        getClickNow = false;
+
+        //if (sampGroup === 'helpful') {
+          getClickNow = false; // this ends the trial
+        //}
+
     };
 
         
@@ -202,7 +257,7 @@ jsPsych.plugins["html-click"] = (function() {
         getClickNow = true;
       }
     }
-    //////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////
 
     //display buttons
     var buttons = [];

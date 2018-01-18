@@ -21,8 +21,7 @@
 </head>
 
 <body>
-	<div id="welcome"></div> 
-	 <!-- <div class="clickable"></div>  -->   
+	<div id="welcome"></div>   
 </body>
 
 <script>
@@ -31,8 +30,10 @@
 
 var groups = ['single pos', 'distant neg'];
 var sampGroups = ['helpful', 'random'];
-let group = "" + jsPsych.randomization.sampleWithReplacement(groups, 1) + "";
-let sampGroup = "" + jsPsych.randomization.sampleWithReplacement(sampGroups, 1) + "";
+//let group = "" + jsPsych.randomization.sampleWithReplacement(groups, 1) + "";
+let group = 'single pos';
+let sampGroup = 'random';
+//let sampGroup = "" + jsPsych.randomization.sampleWithReplacement(sampGroups, 1) + "";
 var dimCB = jsPsych.randomization.sampleWithReplacement([1,2], 1);
 console.log('group is: ' + group + ', sampling group is: ' + sampGroup + ', dimCB is: ' + dimCB);
 var numPres = 4; // number of presentations of each stim during training
@@ -43,6 +44,8 @@ var images = [
 './img/plain_card_small.jpg', 
 './img/marked_card_small.jpg',
 './img/faded_card_small.jpg',
+'./img/S6_card_small.jpg',
+'./img/checker_card_small.jpg',
 './img/S1.jpg', 
 './img/S2.jpg',
 './img/S3.jpg',
@@ -199,6 +202,12 @@ ins.ques2 = ['<div style="text-align:left; border:0px solid; padding:10px;' +
 
 var prompt = {};
 
+if (sampGroup === 'random') {
+	prompt.samp = '<center><p>Please choose a card randomly and click on it</p></center>';
+} else if (sampGroup === 'helpful') {
+	prompt.samp = '<center><p>Please click on the marked card we have chosen for you</p></center>';
+}
+
 prompt.train = '<center><p>The above picture appears on the machine. What do you ' +
 	'think will happen? </p>' +
 	'<p>Press <b>S</b> for <b>S</b>HOCK </p> <p>or </p> <p><b>N</b> for <b>N</b>O SHOCK. </p></center>';
@@ -266,6 +275,13 @@ grid.width = 516;
 grid.height = 852;
 var row = [-1,-1];
 var col = [-1,-1];
+var colIdxs = [];
+var rowIdxs = [];
+var chosenCol = [];
+var chosenRow = [];
+var sampSeq = [];
+var grid_stimulus_back = [];
+var grid_stimulus_front = [];
 
 function fillArray(value, length) {
   var arr = [];
@@ -305,12 +321,13 @@ if (sampGroup === 'helpful') {
 var grid_stimulus1 = jsPsych.plugins['vsl-grid-scene'].generate_stimulus(pattern1, image_size);
 var grid_stimulus2 = jsPsych.plugins['vsl-grid-scene'].generate_stimulus(pattern2, image_size);
 
+
 // present first grid
 var sampMan = {
 	type: 'html-click',
 	choices: ['Continue'],
 	button_html: '<button class="jspsych-btn">%choice%</button>',
-	stimulus: [grid_stimulus1 + '<center><p>Please choose a card by clicking on it</p></center>'],
+	stimulus: [grid_stimulus1 + prompt.samp],
 	data: {
 		row: row,
 		col: col
@@ -318,7 +335,8 @@ var sampMan = {
 	post_trial_gap: 1000
 };
 var getClickNow = false; // so previous mouseclicks aren't registered
-var clickCounter = 0;
+var clickCounter = [0,0];
+var sampTrialNum = 0;
 var clickedOn = false;
 introloop.push(sampMan)
 
@@ -328,14 +346,15 @@ if (group === 'distant neg') {
 		type: 'html-click',
 		choices: ['Continue'],
 		button_html: '<button class="jspsych-btn">%choice%</button>',
-		stimulus: [grid_stimulus2 + '<center><p>Please choose a card by clicking on it</p></center>'],
+		stimulus: [grid_stimulus2 + prompt.samp],
 		post_trial_gap: 1000
 	};
-var getClickNow = false; // so previous mouseclicks aren't registered
-var clickCounter = 0;
-var clickedOn = false;
-introloop.push(sampMan2)
+	var getClickNow = false; // so previous mouseclicks aren't registered
+	var clickCounter = 0;
+	var clickedOn = false;
+	introloop.push(sampMan2)
 }
+
 
 //--------------------------------------------------------------------------------
 /* instruction check questions */ 

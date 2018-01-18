@@ -85,12 +85,13 @@ jsPsych.plugins["html-click"] = (function() {
 
     function getClickPos(e) {
       if (getClickNow === true) {
-                var x = e.clientX - display_element.offsetLeft;
+        var x = e.clientX - display_element.offsetLeft;
         var y = e.clientY - display_element.offsetTop;
         ycoord = y;
         xcoord = x
         colIdx = -1;
         rowIdx = -1;
+
         if (xcoord < (grid.width/grid.across)*1+1) {
           colIdx = 0;
         } else if (xcoord < (grid.width/grid.across)*2+1 && xcoord >= (grid.width/grid.across)*1) {
@@ -117,20 +118,40 @@ jsPsych.plugins["html-click"] = (function() {
         } else if (ycoord < (grid.height/grid.down)*6+1 && ycoord >= (grid.height/grid.down)*5) {
           rowIdx = 5;
         }
-        clickedOn = true;
+        if (group === 'distant neg') {
+          clickCounter = clickCounter + 1;
+        } else if (group === 'single pos') {
+          clickCounter[sampTrialNum] = clickCounter[sampTrialNum] + 1;
+        }
 
         if (rowIdx > -1 && colIdx > -1) { // don't register mouseclicks outside grid
 
-          if (sampGroup === 'random') {
+          clickedOn = true;
+
+          if (group === 'distant neg') {
+            var clicks = clickCounter;
+          } else if (group === 'single pos') {
+            var clicks = clickCounter[sampTrialNum];
+          }
+
+          if (sampGroup === 'random' && clicks <= 1) {
+
+            chosenCol[sampTrialNum] = colIdx;
+            chosenRow[sampTrialNum] = rowIdx;
 
             // make new grid stimulus, fade out unselected cards
             var newPattern = [grid.faded, grid.faded, grid.faded, grid.faded, grid.faded, grid.faded];
             grid.fadedNew = fillArray('./img/faded_card_small.jpg', grid.across);
-            grid.fadedNew[colIdx] = './img/marked_card_small.jpg';
+            if (sampTrialNum === 0) {
+              grid.fadedNew[colIdx] = './img/S6_card_small.jpg';
+            } else {
+              grid.fadedNew[colIdx] = './img/checker_card_small.jpg';
+            }
+            //grid.fadedNew[colIdx] = './img/marked_card_small.jpg';
             newPattern[rowIdx] = grid.fadedNew;
             var new_grid_stimulus = jsPsych.plugins['vsl-grid-scene'].generate_stimulus(newPattern, image_size);
             // update stimulus display
-            trial.stimulus = [new_grid_stimulus + '<center><p>Please choose a card by clicking on it</p></center>'];
+            trial.stimulus = [new_grid_stimulus + prompt.samp];
             display_element.innerHTML = '<div class="clickable" id="jspsych-html-click-stimulus">'+trial.stimulus+'</div>'; 
 
             //display buttons
@@ -159,15 +180,25 @@ jsPsych.plugins["html-click"] = (function() {
 
           } else if (sampGroup === 'helpful') {
 
-            if (rowIdx == row[clickCounter] && colIdx == col[clickCounter]) {
+            if (rowIdx == row[sampTrialNum] && colIdx == col[sampTrialNum]) {
+
+              chosenCol[sampTrialNum] = colIdx;
+              chosenRow[sampTrialNum] = rowIdx;
+              console.log('chosenRow: ' + chosenRow + ' chosenCol: ' + chosenCol);
+
               // make new grid stimulus, fade out unselected cards
               var newPattern = [grid.faded, grid.faded, grid.faded, grid.faded, grid.faded, grid.faded];
               grid.fadedNew = fillArray('./img/faded_card_small.jpg', grid.across);
-              grid.fadedNew[colIdx] = './img/marked_card_small.jpg';
+               if (sampTrialNum === 0) {
+                grid.fadedNew[colIdx] = './img/S6_card_small.jpg';
+              } else {
+                grid.fadedNew[colIdx] = './img/checker_card_small.jpg';
+              }
+              // grid.fadedNew[colIdx] = './img/marked_card_small.jpg';
               newPattern[rowIdx] = grid.fadedNew;
               var new_grid_stimulus = jsPsych.plugins['vsl-grid-scene'].generate_stimulus(newPattern, image_size);
               // update stimulus display
-              trial.stimulus = [new_grid_stimulus + '<center><p>Please choose a card by clicking on it</p></center>'];
+              trial.stimulus = [new_grid_stimulus + prompt.samp];
               display_element.innerHTML = '<div class="clickable" id="jspsych-html-click-stimulus">'+trial.stimulus+'</div>'; 
 
               //display buttons
@@ -196,7 +227,7 @@ jsPsych.plugins["html-click"] = (function() {
 
             } // if clicked on marked card
           } // if random
-        } //if row/col >-1
+        } // if row/col >-1
 
 
         //show prompt if there is one
@@ -229,30 +260,17 @@ jsPsych.plugins["html-click"] = (function() {
         }
 
         // save data
-        var ycoords = [];
-        var xcoords = [];
-        var colIdxs = [];
-        var rowIdxs = [];
-        ycoords[clickCounter] = ycoord;
-        xcoords[clickCounter] = xcoord;
-        colIdxs[clickCounter] = colIdx;
-        rowIdxs[clickCounter] = rowIdx;
         jsPsych.data.addProperties({
-          xcoord: xcoord,
-          ycoord: ycoord,
-          rowIdx: rowIdx,
-          colIdx: colIdx
+          chosenRow: chosenRow[sampTrialNum],
+          chosenCol: chosenCol[sampTrialNum]
         });
 
-        clickCounter = clickCounter + 1;
-
-        //if (sampGroup === 'helpful') {
-          getClickNow = false; // this ends the trial
-        //}
-
+        clickedOn = false; // reset
+        clickCounter = 0; // reset
+        sampTrialNum = sampTrialNum + 1;
+        getClickNow = false; // this ends the trial
     };
 
-        
       } else if (getClickNow === false) {
         getClickNow = true;
       }

@@ -135,6 +135,14 @@ jsPsych.plugins["html-click"] = (function() {
           }
 
           if (sampGroup === 'random' && clicks <= 1) {
+            updateNow = true;
+          } else if (sampGroup === 'helpful' && rowIdx == row[sampTrialNum] && colIdx == col[sampTrialNum]) {
+            updateNow = true;
+          } else {
+            updateNow = false;
+          }
+
+          if (updateNow === true) {
 
             chosenCol[sampTrialNum] = colIdx;
             chosenRow[sampTrialNum] = rowIdx;
@@ -178,56 +186,8 @@ jsPsych.plugins["html-click"] = (function() {
               });
             }
 
-          } else if (sampGroup === 'helpful') {
-
-            if (rowIdx == row[sampTrialNum] && colIdx == col[sampTrialNum]) {
-
-              chosenCol[sampTrialNum] = colIdx;
-              chosenRow[sampTrialNum] = rowIdx;
-              console.log('chosenRow: ' + chosenRow + ' chosenCol: ' + chosenCol);
-
-              // make new grid stimulus, fade out unselected cards
-              var newPattern = [grid.faded, grid.faded, grid.faded, grid.faded, grid.faded, grid.faded];
-              grid.fadedNew = fillArray('./img/faded_card_small.jpg', grid.across);
-               if (sampTrialNum === 0) {
-                grid.fadedNew[colIdx] = './img/S6_card_small.jpg';
-              } else {
-                grid.fadedNew[colIdx] = './img/checker_card_small.jpg';
-              }
-              // grid.fadedNew[colIdx] = './img/marked_card_small.jpg';
-              newPattern[rowIdx] = grid.fadedNew;
-              var new_grid_stimulus = jsPsych.plugins['vsl-grid-scene'].generate_stimulus(newPattern, image_size);
-              // update stimulus display
-              trial.stimulus = [new_grid_stimulus + prompt.samp];
-              display_element.innerHTML = '<div class="clickable" id="jspsych-html-click-stimulus">'+trial.stimulus+'</div>'; 
-
-              //display buttons
-              var buttons = [];
-              if (Array.isArray(trial.button_html)) {
-                if (trial.button_html.length == trial.choices.length) {
-                  buttons = trial.button_html;
-                } else {
-                  console.error('Error in html-click plugin. The length of the button_html array does not equal the length of the choices array');
-                }
-              } else {
-                for (var i = 0; i < trial.choices.length; i++) {
-                  buttons.push(trial.button_html);
-                }
-              }
-              display_element.innerHTML += '<center><div id="jspsych-html-click-btngroup"></div></center>'; //centered JL
-              for (var i = 0; i < trial.choices.length; i++) {
-                var str = buttons[i].replace(/%choice%/g, trial.choices[i]);
-                display_element.querySelector('#jspsych-html-click-btngroup').insertAdjacentHTML('beforeend',
-                  '<div class="jspsych-html-click-button" style="display: inline-block; margin:'+trial.margin_vertical+' '+trial.margin_horizontal+'" id="jspsych-html-click-button-' + i +'" data-choice="'+i+'">'+str+'</div>');
-                display_element.querySelector('#jspsych-html-click-button-' + i).addEventListener('click', function(e){
-                  var choice = e.currentTarget.getAttribute('data-choice'); // don't use dataset for jsdom compatibility
-                  after_response(choice);
-                });
-              }
-
-            } // if clicked on marked card
-          } // if random
-        } // if row/col >-1
+          } // if updateNow
+        } // if row/col  
 
 
         //show prompt if there is one

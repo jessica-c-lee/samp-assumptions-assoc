@@ -327,7 +327,8 @@ label.jspsych-survey-multi-choice-text input[type="radio"] {
 .clickable {
     border: 1px solid #333;
     background: #eee;
-    height: 852px; width: 516px;
+    height: 852px; 
+    width: 516px;
     margin: 15px;
     position: center;
 }

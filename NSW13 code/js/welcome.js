@@ -3,7 +3,7 @@ var welcome = {};
 // --------------  things that vary from task to task --------------
 
 welcome.task = {};
-welcome.task.blurb = '<b>"Learning from limited evidence"</b> is a short psychological study investigating how people make decisions.';
+welcome.task.blurb = '<b>"Learning from limited evidence"</b> is a short psychological study investigating how people make predictions.';
 welcome.task.time = '20 minutes';
 welcome.task.pay = 'US$3.33';
 
@@ -12,8 +12,8 @@ welcome.task.pay = 'US$3.33';
 welcome.ethics = {};
 welcome.ethics.approval = '2615';
 welcome.ethics.name = 'Generalization in Humans';
-welcome.ethics.selection = 'You are invited to participate in a study of how human reasoning works.  We hope to learn what information people find most useful in guiding their judgments about the world. You were selected as a possible participant in this study because you accepted our HIT on Amazon Mechanical Turk.';
-welcome.ethics.description = 'If you decide to participate, we will present you with some reasoning problems in which you need to use the (possibly incomplete) information to make judgements (or guesses) about the truth of different propositions. Detailed instructions will be provided once the task begins. The exact number of problems you need to solve depends on which version of the task the computer assigns you to, but the on-screen display will inform you of how much further you have to go. The task should take approximately ' + welcome.task.time + ' to complete including reading time.';
+welcome.ethics.selection = 'You are invited to participate in a study of how humans learn and reason.  We hope to learn what information people find most useful in guiding their judgments about the world. You were selected as a possible participant in this study because you accepted our HIT on Amazon Mechanical Turk.';
+welcome.ethics.description = 'If you decide to participate, we will present you with some stimuli and you will be asked to make predictions about whether those stimuli cause outcomes. Detailed instructions will be provided once the task begins. The task should take approximately ' + welcome.task.time + ' to complete including reading time.';
 
 
 // ----------------------- function to start the task ------------------
@@ -66,9 +66,7 @@ welcome.section.start =
     '<p>Thanks for accepting the HIT. ' + welcome.task.blurb + ' It involves the following steps:</p>' +
     '<ol>' +
     '<li> We ask for demographic information (not connected to your Amazon ID)<br></li>' +
-    '<li> Because this is a University research project, we ask for your informed consent. ' +
-    '     (The format of the consent form is a  standard university document, so it sometimes ' +
-    '     looks a little weird on MTurk)<br></li>' +
+    '<li> Because this is a University research project, we ask for your informed consent.<br></li>' +
     '<li> The study then explains how to do the task in detail. You will need to pass a short ' +
     '     test to check that you understand how the study works.<br></li>' +
     '<li> Next comes the experiment itself.<br></li>' +
@@ -105,7 +103,7 @@ welcome.section.consent =
     '			<p><b>Your consent</b></p>' +
     '			<p>Your decision whether or not to participate will not prejudice your future relations with The University of New South Wales.  If you decide to participate, you are free to withdraw your consent and to discontinue participation at any time without prejudice.</p>' +
     '			<p><b>Inquiries</b></p>' +
-    '			<p>If you have any questions or concerns following your participation, Associate Professor Daniel Navarro (+61 4 2148 8402, email. d.navarro@unsw.edu.au) will be happy to address them. Complaints about the study may be directed to UNSW&#8217;s Research Ethics and Compliance Support, (phone +61 2 9385 4235 or +61 2 9385 4958, email. humanethics@unsw.edu.au).<p> ' +
+    '			<p>If you have any questions or concerns following your participation, Dr. Jessica Lee (+612 9385 1380, email: jessica.lee@unsw.edu.au) will be happy to address them. Complaints about the study may be directed to UNSW&#8217;s Research Ethics and Compliance Support, (phone +61 2 9385 4235 or +61 2 9385 4958, email. humanethics@unsw.edu.au).<p> ' +
     '			<p>Please keep a copy of this information sheet (you can download the pdf <a href="./wtf/info.pdf" target="_blank">here</a>)</p>' +
     '			<br>' +
     '			<p align="center"><b>PARTICIPANT CONSENT</b></p>' +

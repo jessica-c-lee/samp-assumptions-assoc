@@ -510,6 +510,45 @@ timeline.push(successtrial);
 //--------------------------------------------------------------------------------
 /* sampling manipulation */
 
+// function that returns current offset position inside scrollable div
+function recursive_offset(obj) {
+    var currOffset = {
+      	x: 0,
+      	y: 0
+    } 
+    var newOffset = {
+      	x: 0,
+      	y: 0
+    }    
+
+    if (obj !== null) {
+
+      	if (obj.scrollLeft) { 
+        	currOffset.x = obj.scrollLeft;
+      	}
+
+      	if (obj.scrollTop) { 
+        	currOffset.y = obj.scrollTop;
+      	} 
+
+      	if (obj.offsetLeft) { 
+        	currOffset.x -= obj.offsetLeft;
+      	}
+
+      	if (obj.offsetTop) { 
+        	currOffset.y -= obj.offsetTop;
+      	}
+
+      	if (obj.parentNode !== undefined) { 
+        	newOffset = recursive_offset(obj.parentNode);   
+      	}
+
+      	currOffset.x = currOffset.x + newOffset.x;
+      	currOffset.y = currOffset.y + newOffset.y; 
+    }
+    return currOffset;
+}
+
 // present instructions
 var sampIns_block = {
 	type: 'instructions',

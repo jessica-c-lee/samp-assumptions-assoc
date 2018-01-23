@@ -1,7 +1,6 @@
 NSW13 To Do
 ====================================================================
 - Make stimulus appear first, and then questions/ratings etc. (training and test)
-- x/y coords work when scrolling? https://www.kirupa.com/html5/getting_mouse_click_position.htm
 - Working on Mac/PC
 
 

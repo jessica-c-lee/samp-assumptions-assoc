@@ -75,6 +75,7 @@ jsPsych.plugins["html-click"] = (function() {
     }
   }
 
+
   plugin.trial = function(display_element, trial) {
 
     // display stimulus
@@ -85,8 +86,11 @@ jsPsych.plugins["html-click"] = (function() {
 
     function getClickPos(e) {
       if (getClickNow === true) {
-        var x = e.clientX - display_element.offsetLeft;
-        var y = e.clientY - display_element.offsetTop;
+        var offset = recursive_offset(display_element);
+        var x = e.clientX + offset.x;
+        var y = e.clientY + offset.y;
+        // var x = e.clientX - display_element.offsetLeft;
+        // var y = e.clientY - display_element.offsetTop;
         ycoord = y;
         xcoord = x
         colIdx = -1;

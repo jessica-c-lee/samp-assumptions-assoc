@@ -40,7 +40,7 @@ jsPsych.plugins['image-slider-response'] = (function() {
       start: {
 				type: jsPsych.plugins.parameterType.INT,
 				pretty_name: 'Slider starting value',
-				default: 50,
+				default: 50, 
 				description: 'Sets the starting value of the slider',
 			},
       step: {
@@ -113,27 +113,64 @@ jsPsych.plugins['image-slider-response'] = (function() {
       html += trial.prompt;
     }
 
-    // add submit button
+    //add submit button
     html += '<center><button id="jspsych-image-slider-response-next" class="jspsych-btn">'+trial.button_label+'</button></center>'; // modified by JL, centered
 
+    var html2 = html;
     display_element.innerHTML = html;
+
+    document.getElementById('jspsych-image-slider-response-next').style.visibility='hidden'; // hide submit button
 
     var response = {
       rt: null,
       response: null
     };
 
-    display_element.querySelector('#jspsych-image-slider-response-next').addEventListener('click', function() {
-      // measure response time
-      var endTime = (new Date()).getTime();
-      response.rt = endTime - startTime;
-      response.response = display_element.querySelector('#jspsych-image-slider-response-response').value;
+    //show continue button once initial response made
+    display_element.querySelector('#jspsych-image-slider-response-response').addEventListener('click', function() {
 
-      if(trial.response_ends_trial){
-        end_trial();
-      } else {
-        display_element.querySelector('#jspsych-image-slider-response-next').disabled = true;
+      curResponse = display_element.querySelector('#jspsych-image-slider-response-response').value;
+
+      var html = '<center><div id="jspsych-image-slider-response-wrapper" style="margin: 100px 0px;">';  // modified by JL, centered
+      html += '<div id="jspsych-image-slider-response-stimulus"><img src="' + trial.stimulus + '"></div>'; 
+      html += '<div class="jspsych-image-slider-response-container" style="position:relative;">';
+      html += '<input type="range" value="'+curResponse+'" min="'+trial.min+'" max="'+trial.max+'" step="'+trial.step+'" style="width: 50%;" id="jspsych-image-slider-response-response"></input>'; // modified by JL, original width 100%
+      html += '<div>'
+      for(var j=0; j < trial.labels.length; j++){
+        var width = 100/(trial.labels.length-1); 
+        //var left_offset = (j * (100 /(trial.labels.length - 1))) - (width/2); 
+        var left_offset = (j * (50 /(trial.labels.length - 1))) - (width/4); // Modified by JL
+        html += '<div style="display: inline-block; position: absolute; left:'+left_offset+'%; text-align: center; width: '+width+'%;">'; //modified by JL, scale and text centered
+        html += '<span style="text-align: center; font-size: 80%;">'+trial.labels[j]+'</span>';
+        html += '</div>'
       }
+      html += '</div>';
+      html += '</div>';
+      html += '</div></center>';
+
+      if (trial.prompt !== null){
+        html += trial.prompt;
+      }
+
+      html += '<center><button id="jspsych-image-slider-response-next" class="jspsych-btn">'+trial.button_label+'</button></center>'; 
+
+      display_element.innerHTML = html;
+
+      // when 'continue' button clicked
+      display_element.querySelector('#jspsych-image-slider-response-next').addEventListener('click', function() {
+
+        // measure response time
+        var endTime = (new Date()).getTime();
+        response.rt = endTime - startTime;
+        response.response = display_element.querySelector('#jspsych-image-slider-response-response').value;
+
+        if(trial.response_ends_trial){
+          end_trial();
+        } else {
+          display_element.querySelector('#jspsych-image-slider-response-next').disabled = true;
+        }
+        
+      });
 
     });
 

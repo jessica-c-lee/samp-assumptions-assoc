@@ -4,8 +4,8 @@ var welcome = {};
 
 welcome.task = {};
 welcome.task.blurb = '<b>"Learning from limited evidence"</b> is a short psychological study investigating how people make predictions.';
-welcome.task.time = '20 minutes';
-welcome.task.pay = 'US$3.33';
+welcome.task.time = '15 minutes';
+welcome.task.pay = 'US$2.50';
 
 // --------------  things that vary between ethics approvals --------------
 
@@ -72,11 +72,15 @@ welcome.section.start =
     '<li> Next comes the experiment itself.<br></li>' +
     '<li> At the end, we will give you the completion code you need to get paid for the HIT.</li>' +
     '</ol>' +
-    '<p>The total time taken should be about ' + welcome.task.time + '. Please <u>do not</u> use the "back" ' +
+    '<p>The total time taken should be about ' + welcome.task.time + '. </p>' +
+    '<p>Please <b>do not</b> use the "back" ' +
     '   button on your browser or close the window until you reach the end and receive your completion ' +
-    '   code. This is very likely to break the experiment and may make it difficult for you to get paid.' +
-    '   However, if something does go wrong, please contact us! When you are ready to begin, click on' +
-    '   the "start" button below.</p>' +
+    '   code. This is very likely to break the experiment and may make it difficult for you to get paid. </p>' +
+    '<p>It is also important that you complete the task in <b>one</b> sitting on a <b>computer</b>.' +
+    '   If you attempt to complete the experiment on another device (e.g. ipad, phone), then ' +
+    '   you may not be able to complete the experiment and it will also be difficult for you to get paid.</p>' +
+    '<p>However, if something does go wrong, please contact us! When you are ready to begin, click on' +
+    '   the "Start" button below.</p>' +
     '<!-- Next button for the splash page -->' +
     '<p align="center"> <input type="button" id="splashButton" class="start jspsych-btn" ' +
     'value="Start!" onclick="welcome.click.start()"> </p>' +

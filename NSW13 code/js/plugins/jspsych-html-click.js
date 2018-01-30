@@ -1,8 +1,8 @@
 /**
- * jspsych-html-click (modified from button-press plugin by Jessica Lee 2018)
+ * jspsych-html-click (modified from button-press plugin by Jessica Lee, 2018)
  * Original plugin by Josh de Leeuw
  *
- * plugin for displaying a stimulus, updating stimulus based on location of mouse click
+ * plugin for displaying a stimulus, and updating stimulus based on location of mouse click
  *
  * documentation: docs.jspsych.org
  *
@@ -86,11 +86,11 @@ jsPsych.plugins["html-click"] = (function() {
 
     function getClickPos(e) {
       if (getClickNow === true) {
-        var offset = recursive_offset(display_element);
+        var offset = recursive_offset(display_element); // evaluate the offset based on object and scroll position
         var x = e.clientX + offset.x;
         var y = e.clientY + offset.y;
-        // var x = e.clientX - display_element.offsetLeft;
-        // var y = e.clientY - display_element.offsetTop;
+        // var x = e.clientX - display_element.offsetLeft; // if no scrolling
+        // var y = e.clientY - display_element.offsetTop; // 
         ycoord = y;
         xcoord = x
         colIdx = -1;
@@ -122,22 +122,24 @@ jsPsych.plugins["html-click"] = (function() {
         } else if (ycoord < (grid.height/grid.down)*6+1 && ycoord >= (grid.height/grid.down)*5) {
           rowIdx = 5;
         }
-        if (group === 'distant neg') {
-          clickCounter = clickCounter + 1;
-        } else if (group === 'single pos') {
-          clickCounter[sampTrialNum] = clickCounter[sampTrialNum] + 1;
-        }
 
-        if (rowIdx > -1 && colIdx > -1) { // don't register mouseclicks outside grid
+        if (rowIdx > -1 && colIdx > -1) { // register mouseclicks inside grid only
 
           clickedOn = true;
 
+          // no idea why this works but it does
+          if (group === 'distant neg') {
+            clickCounter = clickCounter + 1;
+          } else if (group === 'single pos') {
+            clickCounter[sampTrialNum] = clickCounter[sampTrialNum] + 1;
+          }
           if (group === 'distant neg') {
             var clicks = clickCounter;
           } else if (group === 'single pos') {
             var clicks = clickCounter[sampTrialNum];
           }
 
+          // only counts first click (and must be marked card if in helpful condition)
           if (sampGroup === 'random' && clicks <= 1) {
             updateNow = true;
           } else if (sampGroup === 'helpful' && rowIdx == row[sampTrialNum] && colIdx == col[sampTrialNum]) {
@@ -159,9 +161,9 @@ jsPsych.plugins["html-click"] = (function() {
             } else {
               grid.fadedNew[colIdx] = './img/checker_card_small.jpg';
             }
-            //grid.fadedNew[colIdx] = './img/marked_card_small.jpg';
             newPattern[rowIdx] = grid.fadedNew;
             var new_grid_stimulus = jsPsych.plugins['vsl-grid-scene'].generate_stimulus(newPattern, image_size);
+
             // update stimulus display
             trial.stimulus = [new_grid_stimulus + prompt.samp];
             display_element.innerHTML = '<div class="clickable" id="jspsych-html-click-stimulus">'+trial.stimulus+'</div>'; 
@@ -189,10 +191,8 @@ jsPsych.plugins["html-click"] = (function() {
                 after_response(choice);
               });
             }
-
-          } // if updateNow
-        } // if row/col  
-
+          } 
+        }  
 
         //show prompt if there is one
         if (trial.prompt !== null) {
@@ -202,44 +202,45 @@ jsPsych.plugins["html-click"] = (function() {
         // function to handle responses by the subject
         function after_response(choice) {
 
-        // measure rt
-        var end_time = Date.now();
-        var rt = end_time - start_time;
-        response.button = choice;
-        response.rt = rt;
+          // measure rt
+          var end_time = Date.now();
+          var rt = end_time - start_time;
+          response.button = choice;
+          response.rt = rt;
 
-        // after a valid response, the stimulus will have the CSS class 'responded'
-        // which can be used to provide visual feedback that a response was recorded
-        display_element.querySelector('#jspsych-html-click-stimulus').className += ' responded';
+          // after a valid response, the stimulus will have the CSS class 'responded'
+          // which can be used to provide visual feedback that a response was recorded
+          display_element.querySelector('#jspsych-html-click-stimulus').className += ' responded';
 
-        // disable all the buttons after a response
-        var btns = document.querySelectorAll('.jspsych-html-click-button button');
-        for(var i=0; i<btns.length; i++){
-          //btns[i].removeEventListener('click');
-          btns[i].setAttribute('disabled', 'disabled');
-        }
+          // disable all the buttons after a response
+          var btns = document.querySelectorAll('.jspsych-html-click-button button');
+          for(var i=0; i<btns.length; i++){
+            //btns[i].removeEventListener('click');
+            btns[i].setAttribute('disabled', 'disabled');
+          }
 
-        if (trial.response_ends_trial) {
-          end_trial();
-        }
+          if (trial.response_ends_trial) {
+            end_trial();
+          }
 
-        // save data
-        jsPsych.data.addProperties({
-          chosenRow: chosenRow[sampTrialNum],
-          chosenCol: chosenCol[sampTrialNum]
-        });
+          // save data
+          jsPsych.data.addProperties({
+            chosenRow: chosenRow[sampTrialNum],
+            chosenCol: chosenCol[sampTrialNum]
+          });
 
-        clickedOn = false; // reset
-        clickCounter = 0; // reset
-        sampTrialNum = sampTrialNum + 1;
-        getClickNow = false; // this ends the trial
-    };
+          clickedOn = false; // reset
+          clickCounter = 0; // reset
+          clicks = 0; // reset
+          sampTrialNum = sampTrialNum + 1;
+          getClickNow = false; // this ends the trial
+      };
 
-      } else if (getClickNow === false) {
-        getClickNow = true;
-      }
+    } else if (getClickNow === false) {
+      getClickNow = true;
     }
-    /////////////////////////////////////////////////////////////////////////////////////////////
+  }
+  /////////////////////////////////////////////////////////////////////////////////////////////
 
     //display buttons
     var buttons = [];

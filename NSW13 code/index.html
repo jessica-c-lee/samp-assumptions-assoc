@@ -13,6 +13,7 @@
 	<script src="./js/plugins/jspsych-image-slider-response.js"></script>
 	<script src="./js/plugins/jspsych-survey-multi-choice.js"></script>
 	<script src="./js/plugins/jspsych-survey-likert.js"></script>
+	<script src="./js/plugins/jspsych-survey-text.js"></script>
 	<script src="./js/welcome.js"></script> 
 	<link href="./js/css/jspsych.css" rel="stylesheet" type="text/css"></link>
 	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
@@ -29,12 +30,21 @@
 
 var groups = ['single pos', 'distant neg'];
 var sampGroups = ['helpful', 'random'];
-let group = "" + jsPsych.randomization.sampleWithReplacement(groups, 1) + "";
-let sampGroup = "" + jsPsych.randomization.sampleWithReplacement(sampGroups, 1) + "";
+//let group = "" + jsPsych.randomization.sampleWithReplacement(groups, 1) + "";
+let group = 'single pos';
+let sampGroup = 'random';
+//let sampGroup = "" + jsPsych.randomization.sampleWithReplacement(sampGroups, 1) + "";
 var dimCB = jsPsych.randomization.sampleWithReplacement([1,2], 1);
 console.log('group is: ' + group + ', sampling group is: ' + sampGroup + ', dimCB is: ' + dimCB);
+
+// experiment parameters
 var numPres = 4; // number of presentations of each stim during training
 var numTestStim = 11; // number of test stimuli
+var iti = []; 
+iti.train = 2000;
+iti.test = 2000;
+iti.ins = 1000;
+
 var images = [
 	'./img/plain_card.jpg', 
 	'./img/marked_card.jpg',
@@ -182,6 +192,13 @@ ins.train1 = [
 	'<p>WELCOME TO THE EXPERIMENT! </p>' +
 	'<p>Throughout the experiment, please read all instructions <b>carefully</b> and ' +
 	'click on the buttons to go forward or back. </p>' +
+	'<p>If you complete the task, you will get your payment no matter what. ' +
+	'We ask that you think about your predictions and judgements seriously. </p>'
+];
+
+ins.train2 = [
+	'<div style="text-align:left; border:0px solid; padding:10px;' +
+	'                          width:800px; float:none; font-size:100%">' +
 	'<p>We would like you to imagine that you have come across a strange machine. It appears to have a ' +
 	'display on it, as well as a sign that says "WARNING: this machine gives ' +
 	'electric shocks!! When you see warning symbols like this ______, do NOT touch!". </p>' +
@@ -191,15 +208,14 @@ ins.train1 = [
 	'<center><img src="./img/shock_machine.jpg"></center>'
 ];
 
-ins.train2 = [
+ins.train3 = [
 	'<div style="text-align:left; border:0px solid; padding:10px;' +
 	'                          width:800px; float:none; font-size:100%">' +
 	'<p>The experiment is composed of a number of "trials". ' +
 	'On each trial, you will be presented with a symbol on the shock machine. ' +
 	'You will then make a prediction about whether you think a shock will occur. </p>' +
 	'<p>In the FIRST phase of the experiment, you will receive feedback for your predictions ' +
-	'about whether a shock occurred or not. The feedback will help you learn which symbols ' +
-	'lead to shock and which symbols do not. </p>' +
+	'about whether a shock occurred or not. </p>' +
 	'<p>In the SECOND phase of the experiment you will continue to make predictions for other ' +
 	'symbols, but you will NOT receive any feedback. </p>' +
 	'<center><img src="./img/shock_machine.jpg"></center>'
@@ -207,7 +223,7 @@ ins.train2 = [
 
 if (sampGroup === 'random') {
 
-	ins.train3 = [
+	ins.train4 = [
 		'<div style="text-align:left; border:0px solid; padding:10px;' +
 		'                          width:800px; float:none; font-size:100%">' +
 		'<p>The machine is capable of showing 36 different symbols (each ' +
@@ -218,15 +234,15 @@ if (sampGroup === 'random') {
 		'<p>Therefore, although the machine is capable of showing <b>36</b> different symbols, ' +
 		'you will only be able to learn about <b>' + numSymbols + '</b> in the FIRST phase. </p>' +
 		'<p>' + thisSymbolRand + ' will be <b>randomly selected</b> by you (shortly) from the cards below.</p>' +
+		grid_stimulus +
 		'<p>You will need to try and learn as much as you can from ' +
 		'the first phase, to help you in the second phase. </p>' +
-		'<p>First, let&#8217;s check your understanding of the instructions. </p>' +
-		grid_stimulus
+		'<p>First, let&#8217;s check your understanding of the instructions. </p>'
 	];
 	
 } else if (sampGroup === 'helpful') {
 
-	ins.train3 = [
+	ins.train4 = [
 		'<div style="text-align:left; border:0px solid; padding:10px;' +
 		'                          width:800px; float:none; font-size:100%">' +
 		'<p>The machine is capable of showing 36 different symbols (each ' +
@@ -239,10 +255,10 @@ if (sampGroup === 'random') {
 		'<p>' + thisSymbolHelp + ' been <b>chosen</b> by us (we will tell you which ' +
 		 cardPlural + ' to select shortly) ' +
 		' to help you figure out which symbols lead to shock.</p>' +
+		grid_stimulus +
 		'<p>You will need to try and learn as much as you can from ' +
 		'the first phase, to help you in the second phase. </p>' +
-		'<p>First, let&#8217;s check your understanding of the instructions. </p>' +
-		grid_stimulus
+		'<p>First, let&#8217;s check your understanding of the instructions. </p>'
 	];	
 }
 
@@ -253,19 +269,19 @@ if (sampGroup === 'helpful' && group === 'single pos') {
 		'                          width:800px; float:none; font-size:100%">' +
 		'<p>On the next screen, you will be presented with 36 cards representing the 36 possible symbols ' +
 		'that can be displayed on the machine. </p>' +
-		'<p>To make your job easier, we have specifically chosen <b>one symbol</b> (marked with an X) to ' +
+		'<p>To help make your job easier, we have specifically chosen <b>one symbol</b> (marked with an X) to ' +
 		'help you work out which symbols lead to shock (marked with an X). </p>' +
 		'<p>When you click on a card, your symbol will be revealed, and you can click Continue. </p>' +
 		'<center><img src="./img/shock_machine.jpg"></center>'
 	];
 
-	ins.train4 = [
+	ins.train5 = [
 		'<div style="text-align:left; border:0px solid; padding:10px;' +
 		'                          width:800px; float:none; font-size:100%">' +
 		'<p>PHASE ONE will now begin. </p>' +
 		'<p>In this phase, you will learn whether the symbol we have chosen for you ' +
 		'leads to shock. ' +
-		'We will present the symbol to you a number of times. </p>' +
+		'We will present the same symbol to you MULTIPLE times. </p>' +
 		'<p>On each trial, you will be presented with the symbol shown on the machine. ' +
 		'Make a prediction about whether you think a SHOCK will occur. </p>' +
 		'<p>Press "S" if you think a <b>S</b>HOCK will occur, or "N" if you think <b>N</b>O shock will occur. </p>'
@@ -276,19 +292,19 @@ if (sampGroup === 'helpful' && group === 'single pos') {
 		'                          width:800px; float:none; font-size:100%">' +
 		'<p>On the next screen, you will be presented with 36 cards representing the 36 possible symbols ' +
 		'that can be displayed on the machine. </p>' +
-		'<p>To make your job easier, we have specifically chosen <b>two symbols</b> (marked with an X) to ' +
+		'<p>To help make your job easier, we have specifically chosen <b>two symbols</b> (marked with an X) to ' +
 		'help you work out which symbols lead to shock. </p>' +
 		'<p>When you click on a card, your symbol will be revealed, and you can click Continue. </p>' +
 		'<center><img src="./img/shock_machine.jpg"></center>'
 	];
 
-	ins.train4 = [
+	ins.train5 = [
 		'<div style="text-align:left; border:0px solid; padding:10px;' +
 		'                          width:800px; float:none; font-size:100%">' +
 		'<p>PHASE ONE will now begin. </p>' +
 		'<p>In this phase, you will learn whether the symbols we have chosen for you ' +
 		'lead to shock. ' +
-		'We will present the symbols to you a number of times. </p>' +
+		'We will present the same symbols to you MULTIPLE times. </p>' +
 		'<p>On each trial, you will be presented with the symbol shown on the machine. ' +
 		'Make a prediction about whether you think a SHOCK will occur. </p>' +
 		'<p>Press "S" if you think a <b>S</b>HOCK will occur, or "N" if you think <b>N</b>O shock will occur. </p>'
@@ -304,13 +320,13 @@ if (sampGroup === 'helpful' && group === 'single pos') {
 		'<center><img src="./img/shock_machine.jpg"></center>'
 	];
 
-	ins.train4 = [
+	ins.train5 = [
 		'<div style="text-align:left; border:0px solid; padding:10px;' +
 		'                          width:800px; float:none; font-size:100%">' +
 		'<p>PHASE ONE will now begin. </p>' +
 		'<p>In this phase, you will learn whether the symbol you have selected from the 36 possible symbols ' +
 		'leads to shock. ' +
-		'We will present the symbol to you a number of times. </p>' +
+		'We will present the same symbol to you MULTIPLE times. </p>' +
 		'<p>On each trial, you will be presented with the symbol shown on the machine. ' +
 		'Make a prediction about whether you think a SHOCK will occur. </p>' +
 		'<p>Press "S" if you think a <b>S</b>HOCK will occur, or "N" if you think <b>N</b>O shock will occur. </p>'
@@ -326,13 +342,13 @@ if (sampGroup === 'helpful' && group === 'single pos') {
 		'<center><img src="./img/shock_machine.jpg"></center>'
 	];
 
-	ins.train4 = [
+	ins.train5 = [
 		'<div style="text-align:left; border:0px solid; padding:10px;' +
 		'                          width:800px; float:none; font-size:100%">' +
 		'<p>PHASE ONE will now begin. </p>' +
 		'<p>In this phase, you will learn whether the symbols you have selected from the 36 possible symbols ' +
 		'lead to shock. ' +
-		'We will present the symbols to you a number of times. </p>' +
+		'We will present the same symbols to you MULTIPLE times. </p>' +
 		'<p>On each trial, you will be presented with the symbol shown on the machine. ' +
 		'Make a prediction about whether you think a SHOCK will occur. </p>' +
 		'<p>Press "S" if you think a <b>S</b>HOCK will occur, or "N" if you think <b>N</b>O shock will occur. </p>'
@@ -373,7 +389,7 @@ ins.ques2 = ['<div style="text-align:left; border:0px solid; padding:10px;' +
 var prompt = {};
 
 if (sampGroup === 'random') {
-	prompt.samp = '<center><p>Please choose a card randomly and click on it</p></center>';
+	prompt.samp = '<center><p>Please choose a random card and click on it</p></center>';
 } else if (sampGroup === 'helpful') {
 	prompt.samp = '<center><p>Please click on the marked card we have chosen for you</p></center>';
 }
@@ -392,16 +408,16 @@ var ques = {};
 
 ques.likertLabels = ['Definitely untrue', 'Probably untrue', 'Neutral', 'Probably true', 'Definitely true'];
 
-ques.feat1 = 'In the <b>FIRST</b> part of the experiment, the <b>SHAPE</b> of the symbol ' +
+ques.feat1 = 'In the <b>FIRST</b> part of the experiment (with feedback), the <b>SHAPE</b> of the symbol ' +
 	'determined whether a shock occurred: ';
 
-ques.feat2 = 'In the <b>FIRST</b> part of the experiment, the <b>COLOR</b> of the symbol ' +
+ques.feat2 = 'In the <b>FIRST</b> part of the experiment (with feedback), the <b>COLOR</b> of the symbol ' +
 	'determined whether a shock occurred: ';
 
-ques.feat3 = 'In the <b>SECOND</b> part of the experiment, the <b>SHAPE</b> of the symbol ' +
+ques.feat3 = 'In the <b>SECOND</b> part of the experiment (without feedback), the <b>SHAPE</b> of the symbol ' +
 	'determined whether a shock occurred: ';
 
-ques.feat4 = 'In the <b>SECOND</b> part of the experiment, the <b>COLOR</b> of the symbol ' +
+ques.feat4 = 'In the <b>SECOND</b> part of the experiment (without feedback), the <b>COLOR</b> of the symbol ' +
 	'determined whether a shock occurred: '; 
 
 ques.rulePrompt = '<font size="+2">If you had to choose, which of the following do you believe is <b>most</b> correct? </font>';
@@ -413,11 +429,21 @@ ques.ruleOptions = ['Only a specific bluey-green symbol (and those similar to it
 
 ques.rulePreamble = '<font size="-1">Please read through each option <b>carefully</b></font>';
 
-ques.manCheckPrompt = '<font size="+2">For the <b>first</b> part of the experiment, did you believe your stimuli were: </font>';
+ques.memoryCheckPrompt = '<font size="+2">For the <b>first</b> part of the experiment (with feedback), we <i>told</i> you that your symbols were: </font>';
 
-ques.manCheckOptions = ['Randomly selected', 'Selected on purpose in order to be helpful'];
+ques.memoryCheckOptions = ['selected randomly (by you picking card/s)', 'selected on purpose (by us to help you)'];
 
-ques.manCheckPreamble = '<font size="-1">Please be as <b>honest</b> as possible. You will still receive your payment. </font>';
+ques.manCheckPrompt = '<font size="+2">For the <b>first</b> part of the experiment (with feedback), did you <i>believe</i> your symbols were: </font>';
+
+ques.manCheckOptions = ['determined randomly', 'selected on purpose'];
+
+ques.manCheckPreamble = '<font size="-1">Please be as <b>honest</b> as possible. You will still receive your payment. Your answers may or may not differ between these questions. </font>';
+
+ques.openPreamble = '<font size="-1">You may leave this blank if you wish. </font>';
+
+ques.openPrompt = 'Do you have any comments about the experiment? Did anything seem to go wrong or confuse you?';
+
+ques.openButton = 'Finish'
 
 //--------------------------------------------------------------------------------
 /* introloop: 
@@ -430,9 +456,11 @@ var trainIns_block1 = {
 	pages: [ 
 		ins.train1,
 		ins.train2, 
-		ins.train3],
+		ins.train3,
+		ins.train4],
 	allow_keys: false,
-	show_clickable_nav: true
+	show_clickable_nav: true,
+	post_trial_gap: iti.ins
 };
 introloop.push(trainIns_block1);
 
@@ -522,27 +550,21 @@ function recursive_offset(obj) {
     }    
 
     if (obj !== null) {
-
       	if (obj.scrollLeft) { 
         	currOffset.x = obj.scrollLeft;
       	}
-
       	if (obj.scrollTop) { 
         	currOffset.y = obj.scrollTop;
       	} 
-
       	if (obj.offsetLeft) { 
         	currOffset.x -= obj.offsetLeft;
       	}
-
       	if (obj.offsetTop) { 
         	currOffset.y -= obj.offsetTop;
       	}
-
       	if (obj.parentNode !== undefined) { 
         	newOffset = recursive_offset(obj.parentNode);   
       	}
-
       	currOffset.x = currOffset.x + newOffset.x;
       	currOffset.y = currOffset.y + newOffset.y; 
     }
@@ -652,10 +674,11 @@ var trainSeq = jsPsych.randomization.repeat(trainStim, numPres, unpack=false);
 // present instructions
 var trainIns_block2 = {
 	type: 'instructions',
-	pages: [ins.train4],
+	pages: [ins.train5],
 	allow_keys: false,
 	show_clickable_nav: true,
-	button_label_next: 'Start!'
+	button_label_next: 'Start!',
+	post_trial_gap: iti.ins
 };
 timeline.push(trainIns_block2);
 
@@ -669,7 +692,7 @@ var trainBlock = {
 	'<p><center><font size="+10">%ANS%</font></center></p>',
 	prompt: prompt.train,
 	timing_feedback_duration: 5000,
-	post_trial_gap: 2000,
+	post_trial_gap: iti.train,
 	timeline: trainSeq
 };
 timeline.push(trainBlock); 
@@ -785,7 +808,8 @@ var testInstruction_block = {
 	pages: [ins.test],
 	allow_keys: false,
 	show_clickable_nav: true,
-	button_label_next: 'Start!'
+	button_label_next: 'Start!',
+	post_trial_gap: iti.ins
 };
 timeline.push(testInstruction_block); 
 
@@ -801,7 +825,8 @@ var testBlock = {
 	start: 50,
 	step: 1,
 	prompt: prompt.test,
-	post_trial_gap: 2000,
+	post_trial_gap: iti.test,
+	response_ends_trial: true,
 	timeline: testSeq
 };
 timeline.push(testBlock); 
@@ -813,7 +838,8 @@ var quesInstruction_block = {
 	type: 'instructions',
 	pages: [ins.ques1, ins.ques2],
 	allow_keys: false,
-	show_clickable_nav: true
+	show_clickable_nav: true,
+	post_trial_gap: iti.ins
 };
 
 timeline.push(quesInstruction_block); 
@@ -846,11 +872,13 @@ questionnaire.rule = {
 };
 timeline.push(questionnaire.rule); 
  
-/* manipulation check */
-
+// manipulation check
 questionnaire.manCheck = {
 	type: 'survey-multi-choice',
 	questions: [
+		{prompt: ques.memoryCheckPrompt,
+		options: ques.memoryCheckOptions,
+		required: true, horizontal: false},
 		{prompt: ques.manCheckPrompt,
 		options: ques.manCheckOptions,
 		required: true, horizontal: false}
@@ -858,6 +886,19 @@ questionnaire.manCheck = {
 	preamble: ques.manCheckPreamble
 };
 timeline.push(questionnaire.manCheck); 
+
+// free-response question
+questionnaire.open = {
+	type: 'survey-text',
+	questions: [
+		{prompt: ques.openPrompt,
+		rows: 8,
+		columns: 80}
+	],
+	preamble: ques.openPreamble,
+	button_label: ques.openButton
+};
+timeline.push(questionnaire.open); 
 
 //--------------------------------------------------------------------------------  
 /* start by running the "welcome.js" script */
